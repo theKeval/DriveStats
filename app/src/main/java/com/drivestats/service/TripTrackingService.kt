@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
@@ -202,8 +203,9 @@ class TripTrackingService : Service(), SensorEventListener {
         val x = accelValues[0]
         val y = accelValues[1]
 
-        // Remove gravity component using a simple high-pass approach (longitudinal = y, lateral = x)
-        val longitudinal = y  // simplified; full implementation would calibrate to car orientation
+        // TODO: Replace with a proper gravity-removal high-pass filter and device-orientation
+        //       calibration so that longitudinal/lateral axes map to the vehicle frame correctly.
+        val longitudinal = y
         val lateral = x
 
         val now = System.currentTimeMillis()
@@ -280,20 +282,18 @@ class TripTrackingService : Service(), SensorEventListener {
             }
             tripRepository.endTrip(currentTripId, endTime, totalDistanceMeters)
 
-            // Retrieve all events for scoring
-            tripRepository.observeEventsForTrip(currentTripId).collect { events ->
-                val isNight = isNightTime(tripStartTimeMs)
-                val score = scoreCalculator.calculate(
-                    tripId = currentTripId,
-                    events = events,
-                    tripDurationMs = durationMs,
-                    isNight = isNight,
-                    signalConfidence = computeSignalConfidence(),
-                )
-                tripRepository.saveScore(score)
-                stopSelf()
-                return@collect
-            }
+            // Retrieve all events for scoring (first emission after trip ends)
+            val events = tripRepository.observeEventsForTrip(currentTripId).first()
+            val isNight = isNightTime(tripStartTimeMs)
+            val score = scoreCalculator.calculate(
+                tripId = currentTripId,
+                events = events,
+                tripDurationMs = durationMs,
+                isNight = isNight,
+                signalConfidence = computeSignalConfidence(),
+            )
+            tripRepository.saveScore(score)
+            stopSelf()
         }
 
         fusedLocationClient.removeLocationUpdates(locationCallback)
@@ -307,6 +307,8 @@ class TripTrackingService : Service(), SensorEventListener {
         return hour < 6 || hour >= 22
     }
 
+    // TODO: Track in-memory location-point count and GPS accuracy history to compute a
+    //       meaningful confidence value. For now the MVP returns a fixed 100%.
     private fun computeSignalConfidence(): Float = 100f
 
     // ── Notification ──────────────────────────────────────────────────────

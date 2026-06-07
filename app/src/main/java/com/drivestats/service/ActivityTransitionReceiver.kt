@@ -8,7 +8,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.drivestats.data.repository.TripRepository
 import com.google.android.gms.location.DetectedActivity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -17,14 +16,15 @@ import kotlinx.coroutines.launch
  *
  * When the user enters a vehicle, this receiver starts a new trip detection
  * sequence. When the user exits a vehicle, it stops the active tracking service.
+ *
+ * Coroutine work is launched using [goAsync] so the system does not kill the
+ * receiver before the background work completes.
  */
 @AndroidEntryPoint
 class ActivityTransitionReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var tripRepository: TripRepository
-
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
         if (!ActivityTransitionResult.hasResult(intent)) return
@@ -46,15 +46,18 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
     }
 
     private fun onEnteredVehicle(context: Context) {
-        scope.launch {
-            // Create a new detecting trip
-            val tripId = tripRepository.startTrip(System.currentTimeMillis())
-            // Start the foreground tracking service
-            val serviceIntent = Intent(context, TripTrackingService::class.java).apply {
-                action = TripTrackingService.ACTION_START_TRIP
-                putExtra(TripTrackingService.EXTRA_TRIP_ID, tripId)
+        val pendingResult = goAsync()
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val tripId = tripRepository.startTrip(System.currentTimeMillis())
+                val serviceIntent = Intent(context, TripTrackingService::class.java).apply {
+                    action = TripTrackingService.ACTION_START_TRIP
+                    putExtra(TripTrackingService.EXTRA_TRIP_ID, tripId)
+                }
+                context.startForegroundService(serviceIntent)
+            } finally {
+                pendingResult.finish()
             }
-            context.startForegroundService(serviceIntent)
         }
     }
 

@@ -136,9 +136,7 @@ class TripRepositoryImpl @Inject constructor(
         efficiencyScore = efficiencyScore,
         tripQualityScore = tripQualityScore,
         starRating = starRating,
-        breakdownJson = breakdown.entries.joinToString(",", "{", "}") { (k, v) ->
-            "\"${k.replace("\"", "\\\"")}\":\"${v.replace("\"", "\\\"")}\""
-        },
+        breakdownJson = breakdownToJson(breakdown),
         signalConfidence = signalConfidence,
     )
 
@@ -153,20 +151,21 @@ class TripRepositoryImpl @Inject constructor(
         signalConfidence = signalConfidence,
     )
 
-    /** Simple JSON key-value parser (avoids adding a JSON library dependency). */
+    /** Serialises the breakdown map to JSON using Android's built-in JSONObject. */
+    private fun breakdownToJson(breakdown: Map<String, String>): String {
+        val obj = org.json.JSONObject()
+        breakdown.forEach { (k, v) -> obj.put(k, v) }
+        return obj.toString()
+    }
+
+    /** Deserialises the breakdown JSON using Android's built-in JSONObject. */
     private fun parseBreakdownJson(json: String): Map<String, String> {
         if (json == "{}" || json.isBlank()) return emptyMap()
         return try {
-            val inner = json.removeSurrounding("{", "}")
-            // Split on ","" (end of value, comma, start of next key quote)
-            val pairs = inner.split("\",\"")
-            pairs.associate { pair ->
-                val colonIdx = pair.indexOf("\":\"")
-                if (colonIdx < 0) return@associate "" to ""
-                val key = pair.substring(0, colonIdx).removePrefix("\"")
-                val value = pair.substring(colonIdx + 3).removeSuffix("\"")
-                key to value
-            }.filterKeys { it.isNotEmpty() }
+            val obj = org.json.JSONObject(json)
+            buildMap {
+                obj.keys().forEach { key -> put(key, obj.getString(key)) }
+            }
         } catch (_: Exception) {
             emptyMap()
         }

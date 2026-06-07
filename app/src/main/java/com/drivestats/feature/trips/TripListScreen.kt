@@ -93,7 +93,7 @@ private fun TripCard(trip: TripSession, onClick: () -> Unit) {
     val stateLabel = when (trip.state) {
         TripState.ACTIVE -> "Recording…"
         TripState.DETECTING -> "Detecting…"
-        TripState.COMPLETED -> trip.score?.let { "★ ${"%.1f".format(it.starRating)}" } ?: "Scored"
+        TripState.COMPLETED -> trip.score?.let { "★ ${"%.1f".format(it.starRating)}" } ?: "Scoring…"
         TripState.DISCARDED -> "Discarded"
     }
     val distanceKm = trip.distanceMeters / 1000.0
