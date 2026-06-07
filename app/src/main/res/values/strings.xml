@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">DriveStats</string>
+    <string name="notification_channel_trip_tracking">Trip Tracking</string>
+    <string name="notification_recording_title">Recording trip</string>
+    <string name="notification_recording_text">DriveStats is tracking your drive</string>
+    <string name="notification_stop_action">Stop</string>
+
+    <!-- Permissions -->
+    <string name="permission_location_title">Precise location</string>
+    <string name="permission_location_rationale">Required to track your route and detect speeding.</string>
+    <string name="permission_activity_title">Physical activity</string>
+    <string name="permission_activity_rationale">Lets DriveStats detect when you enter a vehicle.</string>
+    <string name="permission_notifications_title">Notifications</string>
+    <string name="permission_notifications_rationale">Shows a notification while recording so you always know when tracking is active.</string>
+</resources>
