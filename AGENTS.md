@@ -53,6 +53,8 @@ a batched review-fix request on your PR. Read `common.md` for shared conventions
 The issue/PR title carries a Jira key like `DRIVE-12`. You MUST:
 - Include the Jira key in **every commit message** (e.g. `DRIVE-12: add trip list screen`).
 - Include the Jira key in the **PR title AND the PR description**.
+- If **you** create the branch (CLI/local contexts), name it `<key>-short-slug`
+  (e.g. `DRIVE-12-trip-list`). (Cloud coding agent branches are platform-named — skip.)
 - Never open a PR without it. Automation depends on this key; missing keys break the
   Jira sync and will fail checks.
 
