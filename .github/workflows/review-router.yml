@@ -42,9 +42,16 @@ jobs:
       - name: Identify PR for the completed agent run
         id: pr
         run: |
-          SOURCE="${{ github.event.workflow_run.name }}"
+          # workflow_run.name is the RUN's display title for dynamic Copilot workflows —
+          # use the workflow path to identify the source reliably
+          WF_PATH="${{ github.event.workflow.path }}"
+          case "$WF_PATH" in
+            *copilot-swe-agent*) SOURCE="dev-agent" ;;
+            *copilot-pull-request-reviewer*) SOURCE="reviewer" ;;
+            *) echo "unknown source workflow: $WF_PATH — skip"; echo "num=" >> "$GITHUB_OUTPUT"; exit 0 ;;
+          esac
           BRANCH="${{ github.event.workflow_run.head_branch }}"
-          echo "source workflow: $SOURCE | head branch: $BRANCH"
+          echo "source: $SOURCE ($WF_PATH) | head branch: $BRANCH"
           # find the open PR whose head is that branch
           NUM=$(gh api "/repos/$REPO/pulls?state=open&head=${REPO%%/*}:$BRANCH" --jq '.[0].number // empty')
           if [ -z "$NUM" ]; then echo "no open PR for $BRANCH — skip"; echo "num=" >> "$GITHUB_OUTPUT"; exit 0; fi
@@ -81,7 +88,7 @@ jobs:
           }
           add_label() { gh api -X POST "/repos/$REPO/issues/$PR/labels" -f "labels[]=$1" > /dev/null; }
 
-          if [ "$SOURCE" = "Copilot cloud agent" ]; then
+          if [ "$SOURCE" = "dev-agent" ]; then
             # ---- @dev session finished -> request the (re-)review ----
             if [ -n "$KEY" ]; then :; else echo "::warning::PR #$PR has no Jira key"; fi
             case "$LABELS" in
@@ -100,7 +107,7 @@ jobs:
             exit 0
           fi
 
-          # ---- SOURCE = "Copilot" -> a code review was submitted: route it ----
+          # ---- SOURCE = reviewer -> a code review was submitted: route it ----
           LAST_REVIEW=$(gh api "/repos/$REPO/pulls/$PR/reviews" \
             --jq '[.[] | select(.user.login | startswith("copilot-pull-request"))] | last')
           if [ -z "$LAST_REVIEW" ] || [ "$LAST_REVIEW" = "null" ]; then echo "no Copilot review found — skip"; exit 0; fi
