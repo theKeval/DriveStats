@@ -60,20 +60,64 @@ The issue/PR title carries a Jira key like `DRIVE-12`. You MUST:
    comment on the issue explaining what's unclear instead of guessing wildly.
 2. **Work like a senior engineer:** small focused commits, meaningful messages, tests for
    new logic, run existing tests/lint before opening the PR.
-3. **Match the codebase.** Follow existing architecture and patterns in DriveStats
-   (see path-specific instructions for Android/Kotlin/Compose rules).
+3. **Match the codebase.** Detect the project's stack and existing patterns first; follow
+   them. Path-specific instruction files (`.github/instructions/`) override this file.
 4. **PR description must include:** the Jira key, what changed, how it was verified
    (tests run, screenshots for UI), and any acceptance criterion you could NOT meet with
    the reason.
 5. **Open the PR as a draft.**
 
-## Software design rules (all implementations)
+## Clean architecture (all projects)
 
-- Single responsibility per class/composable; prefer composition over inheritance.
+Layer every feature as **Presentation → Domain → Data**, dependencies pointing inward only:
+
+- **Domain** (pure business logic): entities, use cases, repository *interfaces*. No
+  framework, UI, or I/O imports. This layer is unit-tested the most.
+- **Data**: repository *implementations*, remote/local data sources, DTOs + mappers.
+  DTOs never leak past this layer — map to domain models at the boundary.
+- **Presentation**: UI + state holders (ViewModel/store). Talks to domain use cases only;
+  never calls data sources directly.
+- **Unidirectional data flow:** UI emits events → state holder updates immutable state →
+  UI re-renders. Single source of truth per screen.
+- **Dependency injection** for wiring (constructor injection preferred); no service
+  locators or globals.
+- Small projects may collapse layers (e.g. skip use cases for pass-through calls) — keep
+  the dependency direction even then.
+
+## Universal design rules
+
+- Single responsibility per class/function/component; composition over inheritance.
+- Handle errors explicitly at boundaries (sealed results/typed errors); no silent catches.
 - No dead code, no commented-out blocks, no TODOs without a Jira key.
-- Handle errors explicitly — no silent catch-and-ignore.
-- Keep functions small; extract when a function does more than one thing.
 - New dependencies require a stated justification in the PR description.
+- Immutability by default; side effects isolated and named.
+
+## Platform playbooks — detect the stack, apply the matching one
+
+**Android (Kotlin + Jetpack Compose)** — follow official Android architecture guidance:
+stateless composables, state hoisted to ViewModel exposing `StateFlow`/`UiState`;
+Material 3; structured concurrency (`viewModelScope`, main-safe repositories); Room/Retrofit
+(or as codebase dictates) behind repository interfaces; Hilt/Koin DI; version catalog for
+dependencies; no `!!`.
+
+**iOS (Swift + SwiftUI)** — MVVM with `@Observable`/`ObservableObject` state; protocol-based
+domain boundaries; Swift concurrency (`async/await`, actors — no completion-handler
+pyramids); value types (structs) by default; follow Apple HIG for UX behavior; XCTest for
+domain/ViewModel logic.
+
+**Kotlin Multiplatform** — share **domain + data** in the shared module (`expect/actual`
+for platform code); keep UI native (Compose / SwiftUI) and thin; Ktor/SQLDelight-style
+multiplatform libs in shared code; Koin for DI; unit tests live in the shared module.
+
+**Cross-platform JS (React Native)** — TypeScript strict; function components + hooks;
+business logic in plain TS modules (testable without the renderer); navigation and platform
+APIs behind adapters; avoid heavy re-renders (memoize deliberately, not everywhere).
+
+**Web (React/Next.js/Vue)** — TypeScript strict everywhere; component-driven structure with
+colocated tests/styles; server state via query libs (TanStack Query/SWR), UI state local
+first, global stores (Zustand/Pinia) only when truly global; semantic HTML + keyboard
+accessibility + WCAG AA contrast; optimize Core Web Vitals (code-splitting, image
+optimization, SSR/SSG where the framework provides it).
 
 ## Addressing review feedback (batched)
 
