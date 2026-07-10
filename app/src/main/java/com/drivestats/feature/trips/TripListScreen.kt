@@ -32,8 +32,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.drivestats.R
 import com.drivestats.domain.model.TripSession
 import com.drivestats.domain.model.TripState
 import java.text.SimpleDateFormat
@@ -63,7 +65,7 @@ fun TripListScreen(
                         Icon(Icons.Outlined.Settings, contentDescription = "Settings")
                     }
                     IconButton(onClick = onAboutClick) {
-                        Icon(Icons.Outlined.Info, contentDescription = "About")
+                        Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about_icon_description))
                     }
                 },
             )
