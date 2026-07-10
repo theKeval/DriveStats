@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.DirectionsCar
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +46,7 @@ fun TripListScreen(
     onTripClick: (Long) -> Unit,
     onInsightsClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onAboutClick: () -> Unit,
     viewModel: TripListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -59,6 +61,9 @@ fun TripListScreen(
                     }
                     IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Outlined.Settings, contentDescription = "Settings")
+                    }
+                    IconButton(onClick = onAboutClick) {
+                        Icon(Icons.Outlined.Info, contentDescription = "About")
                     }
                 },
             )

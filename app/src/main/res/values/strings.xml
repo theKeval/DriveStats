@@ -5,6 +5,12 @@
     <string name="notification_recording_text">DriveStats is tracking your drive</string>
     <string name="notification_stop_action">Stop</string>
 
+    <!-- About -->
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="back">Back</string>
+    <string name="about_icon_description">About</string>
+
     <!-- Permissions -->
     <string name="permission_location_title">Precise location</string>
     <string name="permission_location_rationale">Required to track your route and detect speeding.</string>
