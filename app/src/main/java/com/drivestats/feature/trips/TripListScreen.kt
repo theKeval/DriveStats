@@ -59,10 +59,10 @@ fun TripListScreen(
                 title = { Text("DriveStats") },
                 actions = {
                     IconButton(onClick = onInsightsClick) {
-                        Icon(Icons.Outlined.BarChart, contentDescription = "Insights")
+                        Icon(Icons.Outlined.BarChart, contentDescription = stringResource(R.string.insights_icon_description))
                     }
                     IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Outlined.Settings, contentDescription = "Settings")
+                        Icon(Icons.Outlined.Settings, contentDescription = stringResource(R.string.settings_icon_description))
                     }
                     IconButton(onClick = onAboutClick) {
                         Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about_icon_description))
