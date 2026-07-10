@@ -63,7 +63,7 @@ fun AboutScreen(onBack: () -> Unit) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
+                stringResource(R.string.about_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
