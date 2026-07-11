@@ -1,21 +1,30 @@
 name: Review router
 
-# Agentic-workflow Phase 5: orchestrates the @seniorDev (Copilot code review) loop.
+# Agentic-workflow Phase 5 (v3): orchestrates the @seniorDev (Copilot code review) loop.
 #
-# KEY CONSTRAINT (discovered in Gate 5): actions taken by the Copilot bots do NOT emit
-# normal webhook events to Actions (no pull_request_review, no review_requested from them).
-# Both Copilot agents run as workflows in this repo, so we hook `workflow_run` instead:
-#   - "Copilot cloud agent" completes  -> @dev finished a session  -> request Copilot review
-#   - "Copilot" (code review) completes -> review submitted        -> route it
+# DESIGN: a single idempotent STATE MACHINE per open agent PR, driven by labels:
+#   (none) -> copilot-review-requested -> review-round-1 + fix-dispatched
+#          -> re-review-requested -> review-clean | escalated   (terminal)
 #
-# Loop: dev session -> review -> [clean -> human merge] or [comments -> ONE batched fix
-# dispatch (round cap 1) -> fix session -> re-review -> clean or escalate to human].
+# WHY: Copilot bots emit no normal webhook events; reviewer-triggered workflow_run runs
+# are held for approval (no policy toggle) AND carry head_branch=main (can't find the PR).
+# So: the coding agent's workflow_run gives low latency, and a 10-min SCHEDULE sweep
+# gives reliability for everything else. Every trigger routes ALL candidate PRs the
+# same way; label + timestamp guards make repeat runs harmless.
+#
+# SWEEP ON/OFF: repo variable ROUTER_SWEEP.
+#   pause:  gh variable set ROUTER_SWEEP -b off -R <repo>
+#   resume: gh variable set ROUTER_SWEEP -b on  -R <repo>   (or delete the variable)
+#   manual: gh workflow run review-router.yml -R <repo>     (runs even when paused)
 # Master lives in agentic-workflow repo (github/workflows/review-router.yml).
 
 on:
   workflow_run:
-    workflows: ["Copilot cloud agent", "Copilot"]
+    workflows: ["Copilot cloud agent"]
     types: [completed]
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
 
 permissions:
   issues: write
@@ -38,104 +47,133 @@ env:
 jobs:
   route:
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule' || vars.ROUTER_SWEEP != 'off'
     steps:
-      - name: Identify PR for the completed agent run
-        id: pr
+      - name: Route all agent PRs through the review state machine
         run: |
-          # workflow_run.name is the RUN's display title for dynamic Copilot workflows —
-          # use the workflow path to identify the source reliably
-          WF_PATH="${{ github.event.workflow.path }}"
-          case "$WF_PATH" in
-            *copilot-swe-agent*) SOURCE="dev-agent" ;;
-            *copilot-pull-request-reviewer*) SOURCE="reviewer" ;;
-            *) echo "unknown source workflow: $WF_PATH — skip"; echo "num=" >> "$GITHUB_OUTPUT"; exit 0 ;;
-          esac
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-          echo "source: $SOURCE ($WF_PATH) | head branch: $BRANCH"
-          # find the open PR whose head is that branch
-          NUM=$(gh api "/repos/$REPO/pulls?state=open&head=${REPO%%/*}:$BRANCH" --jq '.[0].number // empty')
-          if [ -z "$NUM" ]; then echo "no open PR for $BRANCH — skip"; echo "num=" >> "$GITHUB_OUTPUT"; exit 0; fi
-          TITLE=$(gh api "/repos/$REPO/pulls/$NUM" --jq .title)
-          case "$TITLE" in
-            *"[WIP]"*) echo "agent still mid-session ([WIP]) — skip"; echo "num=" >> "$GITHUB_OUTPUT"; exit 0 ;;
-          esac
-          KEY=$(echo "$TITLE" | grep -oE '[A-Z][A-Z0-9]+-[0-9]+' | head -1 || true)
-          LABELS=$(gh api "/repos/$REPO/issues/$NUM/labels" --jq '[.[].name] | join(",")')
-          {
-            echo "num=$NUM"
-            echo "key=$KEY"
-            echo "labels=$LABELS"
-            echo "source=$SOURCE"
-          } >> "$GITHUB_OUTPUT"
-          echo "PR #$NUM | $TITLE | labels: $LABELS"
+          set -euo pipefail
 
-      - name: Route
-        if: steps.pr.outputs.num != ''
-        run: |
-          PR="${{ steps.pr.outputs.num }}"
-          KEY="${{ steps.pr.outputs.key }}"
-          LABELS="${{ steps.pr.outputs.labels }}"
-          SOURCE="${{ steps.pr.outputs.source }}"
-
-          jira_comment() {
-            [ -z "$KEY" ] && return 0
-            jq -n --arg t "$1" '{body:{type:"doc",version:1,content:[{type:"paragraph",content:[{type:"text",text:$t}]}]}}' \
+          jira_comment() { # $1=key $2=text
+            [ -z "$1" ] && return 0
+            jq -n --arg t "$2" '{body:{type:"doc",version:1,content:[{type:"paragraph",content:[{type:"text",text:$t}]}]}}' \
             | curl -sf -u "$JIRA_EMAIL:$JIRA_API_TOKEN" -H "Content-Type: application/json" -X POST \
-                "$JIRA_BASE_URL/rest/api/3/issue/$KEY/comment" -d @- > /dev/null
+                "$JIRA_BASE_URL/rest/api/3/issue/$1/comment" -d @- > /dev/null
           }
           slack() {
             curl -sf -X POST -H "Content-Type: application/json" -d "$(jq -n --arg t "$1" '{text:$t}')" "$SLACK_WEBHOOK_SENIORDEV" > /dev/null
           }
-          add_label() { gh api -X POST "/repos/$REPO/issues/$PR/labels" -f "labels[]=$1" > /dev/null; }
-
-          if [ "$SOURCE" = "dev-agent" ]; then
-            # ---- @dev session finished -> request the (re-)review ----
-            if [ -n "$KEY" ]; then :; else echo "::warning::PR #$PR has no Jira key"; fi
-            case "$LABELS" in
-              *re-review-requested*) echo "re-review already requested — skip"; exit 0 ;;
-              *review-round-1*) MODE="re-review" ;;
-              *copilot-review-requested*) echo "initial review already requested — skip"; exit 0 ;;
-              *) MODE="initial" ;;
-            esac
-            [ "$MODE" = "initial" ] && add_label "copilot-review-requested" || add_label "re-review-requested"
+          add_label() { gh api -X POST "/repos/$REPO/issues/$1/labels" -f "labels[]=$2" > /dev/null; }
+          label_time() { # $1=pr $2=label -> ISO time the label was last added ('' if never)
+            gh api --paginate "/repos/$REPO/issues/$1/timeline" \
+              --jq "[.[] | select(.event==\"labeled\" and .label.name==\"$2\")] | last | .created_at // empty" 2>/dev/null \
+              | grep -v '^$' | tail -1 || true
+          }
+          request_review() { # $1=pr
             curl -sf -H "Authorization: Bearer $AGENT_PAT" -H "Accept: application/vnd.github+json" \
-              -X POST "https://api.github.com/repos/$REPO/pulls/$PR/requested_reviewers" \
+              -X POST "https://api.github.com/repos/$REPO/pulls/$1/requested_reviewers" \
               -d '{"reviewers":["copilot-pull-request-reviewer[bot]"]}' > /dev/null
-            jira_comment "Code review ($MODE) requested on PR #$PR."
-            slack ":eyes: *$KEY* — $MODE code review requested on PR #$PR: https://github.com/$REPO/pull/$PR"
-            echo "requested $MODE review on PR #$PR"
-            exit 0
-          fi
+          }
 
-          # ---- SOURCE = reviewer -> a code review was submitted: route it ----
-          LAST_REVIEW=$(gh api "/repos/$REPO/pulls/$PR/reviews" \
-            --jq '[.[] | select(.user.login | startswith("copilot-pull-request"))] | last')
-          if [ -z "$LAST_REVIEW" ] || [ "$LAST_REVIEW" = "null" ]; then echo "no Copilot review found — skip"; exit 0; fi
-          REVIEW_ID=$(echo "$LAST_REVIEW" | jq -r .id)
-          COUNT=$(gh api "/repos/$REPO/pulls/$PR/reviews/$REVIEW_ID/comments" --jq 'length')
-          echo "review $REVIEW_ID: $COUNT inline comments"
+          # dynamic workflow id of the Copilot coding agent (for "is a session running?" checks)
+          SWE_WF_ID=$(gh api "/repos/$REPO/actions/workflows" \
+            --jq '.workflows[] | select(.path | startswith("dynamic/copilot-swe-agent")) | .id' | head -1 || true)
+          agent_run_after() { # $1=branch $2=ISO-time|'' -> "busy", "done", or "none"
+            RUNS=$(gh api "/repos/$SWE_RUNS_PATH?branch=$1&per_page=10" --jq '.workflow_runs' 2>/dev/null || echo '[]')
+            if [ "$(echo "$RUNS" | jq '[.[] | select(.status != "completed")] | length')" -gt 0 ]; then echo busy; return; fi
+            if [ -z "$2" ]; then
+              [ "$(echo "$RUNS" | jq 'length')" -gt 0 ] && echo done || echo none; return
+            fi
+            NEWER=$(echo "$RUNS" | jq --arg t "$2" '[.[] | select(.status=="completed" and .created_at > $t)] | length')
+            [ "$NEWER" -gt 0 ] && echo done || echo none
+          }
+          SWE_RUNS_PATH="$REPO/actions/workflows/$SWE_WF_ID/runs"
 
-          if [ "$COUNT" -eq 0 ]; then
-            # ---- clean review (C2): human merges ----
-            jira_comment "Code review clean on PR #$PR — awaiting human merge. https://github.com/$REPO/pull/$PR"
-            slack ":white_check_mark: *$KEY* review clean on PR #$PR — ready for your merge, Keval: https://github.com/$REPO/pull/$PR"
-            exit 0
-          fi
+          # candidate PRs: open PRs authored by the coding agent, or already carrying router labels
+          PRS=$(gh api "/repos/$REPO/pulls?state=open&per_page=50" --jq \
+            '[.[] | select((.user.login=="copilot-swe-agent") or any(.labels[].name; IN("copilot-review-requested","review-round-1","fix-dispatched","re-review-requested","review-clean","escalated"))) | .number] | unique | .[]')
+          [ -z "$PRS" ] && { echo "no candidate PRs — nothing to do"; exit 0; }
 
-          case "$LABELS" in
-            *fix-dispatched*)
-              # ---- re-review still dirty (C3 cap reached): escalate ----
-              jira_comment "Re-review of PR #$PR still has $COUNT comments after the fix round (cap=1). Escalating to human."
-              slack ":rotating_light: *$KEY* — PR #$PR still has *$COUNT* review comments after the fix round. Human intervention needed: https://github.com/$REPO/pull/$PR"
-              ;;
-            *)
-              # ---- round 1 (C1): ONE batched dispatch to @dev ----
-              add_label "review-round-1"
-              add_label "fix-dispatched"
-              curl -sf -H "Authorization: Bearer $AGENT_PAT" -H "Accept: application/vnd.github+json" \
-                -X POST "https://api.github.com/repos/$REPO/issues/$PR/comments" \
-                -d "$(jq -n '{body:"@copilot A code review with inline comments has been submitted on this PR. Please address ALL unresolved review threads as ONE batch: read every thread first, fix what you accept, and reply with a brief rationale on any you decline. Include the Jira key in every commit message."}')" > /dev/null
-              jira_comment "Code review on PR #$PR found $COUNT comments — fix round 1 of 1 dispatched to the coding agent."
-              slack ":memo: *$KEY* — review found *$COUNT* comments on PR #$PR. @developer dispatched for the (single) fix round: https://github.com/$REPO/pull/$PR"
-              ;;
-          esac
+          for PR in $PRS; do
+            DATA=$(gh api "/repos/$REPO/pulls/$PR")
+            TITLE=$(echo "$DATA" | jq -r .title)
+            BRANCH=$(echo "$DATA" | jq -r .head.ref)
+            LABELS=$(echo "$DATA" | jq -r '[.labels[].name] | join(",")')
+            KEY=$(echo "$TITLE" | grep -oE '[A-Z][A-Z0-9]+-[0-9]+' | head -1 || true)
+            echo "── PR #$PR | $TITLE | labels: [$LABELS]"
+
+            case "$TITLE" in *"[WIP]"*) echo "   [WIP] — agent mid-session, skip"; continue ;; esac
+            case ",$LABELS," in *,review-clean,*|*,escalated,*) echo "   terminal state — skip"; continue ;; esac
+
+            # last Copilot review on this PR
+            LAST=$(gh api "/repos/$REPO/pulls/$PR/reviews" \
+              --jq '[.[] | select(.user.login | startswith("copilot-pull-request"))] | last // empty')
+            R_ID=""; R_AT=""; R_COUNT=0
+            if [ -n "$LAST" ]; then
+              R_ID=$(echo "$LAST" | jq -r .id); R_AT=$(echo "$LAST" | jq -r .submitted_at)
+              R_COUNT=$(gh api "/repos/$REPO/pulls/$PR/reviews/$R_ID/comments" --jq 'length')
+            fi
+
+            case ",$LABELS," in
+              *,re-review-requested,*)
+                # waiting on / routing the round-2 review
+                T=$(label_time "$PR" "re-review-requested")
+                if [ -z "$R_AT" ] || [ "$R_AT" \< "$T" ]; then echo "   re-review pending — skip"; continue; fi
+                if [ "$R_COUNT" -eq 0 ]; then
+                  add_label "$PR" "review-clean"
+                  jira_comment "$KEY" "Re-review clean on PR #$PR — awaiting human merge. https://github.com/$REPO/pull/$PR"
+                  slack ":white_check_mark: *$KEY* re-review clean on PR #$PR — ready for your merge, Keval: https://github.com/$REPO/pull/$PR"
+                  echo "   C2: re-review clean -> awaiting merge"
+                else
+                  add_label "$PR" "escalated"
+                  jira_comment "$KEY" "Re-review of PR #$PR still has $R_COUNT comments after the fix round (cap=1). Escalating to human."
+                  slack ":rotating_light: *$KEY* — PR #$PR still has *$R_COUNT* review comments after the fix round. Human intervention needed: https://github.com/$REPO/pull/$PR"
+                  echo "   C3: still dirty -> escalated"
+                fi ;;
+
+              *,fix-dispatched,*)
+                # fix round dispatched — request re-review once the agent's fix session is done
+                T=$(label_time "$PR" "fix-dispatched")
+                case "$(agent_run_after "$BRANCH" "$T")" in
+                  busy) echo "   fix session running — skip" ;;
+                  none) echo "   fix session not started/finished yet — skip" ;;
+                  done)
+                    add_label "$PR" "re-review-requested"
+                    request_review "$PR"
+                    jira_comment "$KEY" "Code review (re-review) requested on PR #$PR."
+                    slack ":eyes: *$KEY* — re-review requested on PR #$PR: https://github.com/$REPO/pull/$PR"
+                    echo "   fix done -> re-review requested" ;;
+                esac ;;
+
+              *,copilot-review-requested,*)
+                # waiting on / routing the round-1 review
+                if [ -z "$R_ID" ]; then echo "   initial review pending — skip"; continue; fi
+                if [ "$R_COUNT" -eq 0 ]; then
+                  add_label "$PR" "review-clean"
+                  jira_comment "$KEY" "Code review clean on PR #$PR — awaiting human merge. https://github.com/$REPO/pull/$PR"
+                  slack ":white_check_mark: *$KEY* review clean on PR #$PR — ready for your merge, Keval: https://github.com/$REPO/pull/$PR"
+                  echo "   C2: clean -> awaiting merge"
+                else
+                  add_label "$PR" "review-round-1"
+                  add_label "$PR" "fix-dispatched"
+                  curl -sf -H "Authorization: Bearer $AGENT_PAT" -H "Accept: application/vnd.github+json" \
+                    -X POST "https://api.github.com/repos/$REPO/issues/$PR/comments" \
+                    -d "$(jq -n '{body:"@copilot A code review with inline comments has been submitted on this PR. Please address ALL unresolved review threads as ONE batch: read every thread first, fix what you accept, and reply with a brief rationale on any you decline. Include the Jira key in every commit message."}')" > /dev/null
+                  jira_comment "$KEY" "Code review on PR #$PR found $R_COUNT comments — fix round 1 of 1 dispatched to the coding agent."
+                  slack ":memo: *$KEY* — review found *$R_COUNT* comments on PR #$PR. @developer dispatched for the (single) fix round: https://github.com/$REPO/pull/$PR"
+                  echo "   C1: $R_COUNT comments -> single fix round dispatched"
+                fi ;;
+
+              *)
+                # fresh PR — request the initial review once no agent session is active
+                [ -z "$KEY" ] && echo "::warning::PR #$PR has no Jira key"
+                case "$(agent_run_after "$BRANCH" "")" in
+                  busy) echo "   agent session running — skip" ;;
+                  *)
+                    add_label "$PR" "copilot-review-requested"
+                    request_review "$PR"
+                    jira_comment "$KEY" "Code review (initial) requested on PR #$PR."
+                    slack ":eyes: *$KEY* — initial code review requested on PR #$PR: https://github.com/$REPO/pull/$PR"
+                    echo "   initial review requested" ;;
+                esac ;;
+            esac
+          done
