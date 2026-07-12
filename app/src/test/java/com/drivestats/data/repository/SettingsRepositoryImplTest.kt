@@ -5,10 +5,10 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.drivestats.domain.model.DistanceUnit
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import com.drivestats.domain.model.DistanceUnit
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -127,5 +127,7 @@ class SettingsRepositoryImplTest {
     private fun createTempPreferencesFile(): File =
         Files.createTempFile("settings", ".preferences_pb").toFile()
 
+    // The production preference key is private; tests seed the raw stored value by name to
+    // verify legacy migration behavior at the DataStore boundary.
     private val testDistanceUnitKey = stringPreferencesKey("distance_unit")
 }
