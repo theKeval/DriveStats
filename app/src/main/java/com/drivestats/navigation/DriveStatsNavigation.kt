@@ -3,6 +3,7 @@ package com.drivestats.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.DirectionsBus
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
@@ -201,7 +202,7 @@ private fun MainBottomNavigation(
             onClick = onVehiclesClick,
             icon = {
                 Icon(
-                    imageVector = Icons.Outlined.DirectionsCar,
+                    imageVector = Icons.Outlined.DirectionsBus,
                     contentDescription = stringResource(R.string.nav_vehicles_content_description),
                 )
             },

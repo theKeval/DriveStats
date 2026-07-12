@@ -53,6 +53,10 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 
+private val LoadingSummaryCardHeight = 140.dp
+private val LoadingChartCardHeight = 220.dp
+private val LoadingRecordsCardHeight = 180.dp
+
 @Composable
 fun StatsScreen(
     onStartTripClick: () -> Unit,
@@ -123,12 +127,12 @@ private fun StatsLoadingState(modifier: Modifier = Modifier) {
     ) {
         repeat(2) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                LoadingCard(Modifier.weight(1f).height(140.dp))
-                LoadingCard(Modifier.weight(1f).height(140.dp))
+                LoadingCard(Modifier.weight(1f).height(LoadingSummaryCardHeight))
+                LoadingCard(Modifier.weight(1f).height(LoadingSummaryCardHeight))
             }
         }
-        LoadingCard(Modifier.fillMaxWidth().height(220.dp))
-        LoadingCard(Modifier.fillMaxWidth().height(180.dp))
+        LoadingCard(Modifier.fillMaxWidth().height(LoadingChartCardHeight))
+        LoadingCard(Modifier.fillMaxWidth().height(LoadingRecordsCardHeight))
     }
 }
 
