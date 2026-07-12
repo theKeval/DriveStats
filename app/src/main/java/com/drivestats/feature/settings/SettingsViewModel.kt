@@ -15,7 +15,7 @@ import javax.inject.Inject
 data class SettingsUiState(
     val autoDetectEnabled: Boolean = true,
     val cloudSyncEnabled: Boolean = false,
-    val distanceUnit: DistanceUnit = DistanceUnit.KILOMETRES,
+    val distanceUnit: DistanceUnit = DistanceUnit.KILOMETERS,
 )
 
 @HiltViewModel

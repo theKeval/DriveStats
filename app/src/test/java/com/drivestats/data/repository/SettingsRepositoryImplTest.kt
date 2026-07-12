@@ -26,7 +26,7 @@ class SettingsRepositoryImplTest {
 
             assertThat(settings.autoDetectEnabled).isTrue()
             assertThat(settings.cloudSyncEnabled).isFalse()
-            assertThat(settings.distanceUnit).isEqualTo(DistanceUnit.KILOMETRES)
+            assertThat(settings.distanceUnit).isEqualTo(DistanceUnit.KILOMETERS)
         } finally {
             scope.cancel()
             file.delete()

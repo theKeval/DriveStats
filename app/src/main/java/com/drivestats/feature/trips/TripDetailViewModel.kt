@@ -21,7 +21,7 @@ data class TripDetailUiState(
     val trip: TripSession? = null,
     val events: List<DrivingEvent> = emptyList(),
     val score: TripScore? = null,
-    val distanceUnit: DistanceUnit = DistanceUnit.KILOMETRES,
+    val distanceUnit: DistanceUnit = DistanceUnit.KILOMETERS,
     val isLoading: Boolean = true,
 )
 

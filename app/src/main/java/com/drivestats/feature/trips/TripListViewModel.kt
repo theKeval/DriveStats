@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 data class TripListUiState(
     val trips: List<TripSession> = emptyList(),
-    val distanceUnit: DistanceUnit = DistanceUnit.KILOMETRES,
+    val distanceUnit: DistanceUnit = DistanceUnit.KILOMETERS,
     val isLoading: Boolean = true,
 )
 

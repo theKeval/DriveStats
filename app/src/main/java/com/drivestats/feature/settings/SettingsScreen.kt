@@ -121,8 +121,8 @@ private fun UnitPreferenceRow(
         Column(modifier = Modifier.selectableGroup()) {
             UnitOptionRow(
                 label = stringResource(R.string.settings_unit_kilometres),
-                selected = selectedUnit == DistanceUnit.KILOMETRES,
-                onClick = { onUnitSelected(DistanceUnit.KILOMETRES) },
+                selected = selectedUnit == DistanceUnit.KILOMETERS,
+                onClick = { onUnitSelected(DistanceUnit.KILOMETERS) },
             )
             UnitOptionRow(
                 label = stringResource(R.string.settings_unit_miles),

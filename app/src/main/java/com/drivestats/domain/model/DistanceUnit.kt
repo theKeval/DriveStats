@@ -4,6 +4,6 @@ enum class DistanceUnit(
     val distanceSuffix: String,
     val speedSuffix: String,
 ) {
-    KILOMETRES(distanceSuffix = "km", speedSuffix = "km/h"),
+    KILOMETERS(distanceSuffix = "km", speedSuffix = "km/h"),
     MILES(distanceSuffix = "mi", speedSuffix = "mph"),
 }

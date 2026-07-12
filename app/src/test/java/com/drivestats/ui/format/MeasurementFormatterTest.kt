@@ -11,7 +11,7 @@ class MeasurementFormatterTest {
 
     @Test
     fun formatDistance_formatsKilometresToOneDecimalPlace() {
-        assertThat(formatDistance(1_250.0, DistanceUnit.KILOMETRES, Locale.US))
+        assertThat(formatDistance(1_250.0, DistanceUnit.KILOMETERS, Locale.US))
             .isEqualTo("1.3 km")
     }
 

@@ -44,9 +44,12 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     private fun String?.toDistanceUnit(): DistanceUnit = try {
-        this?.let(DistanceUnit::valueOf) ?: DistanceUnit.KILOMETRES
+        when (this) {
+            "KILOMETRES", "KILOMETERS", null -> DistanceUnit.KILOMETERS
+            else -> DistanceUnit.valueOf(this)
+        }
     } catch (_: IllegalArgumentException) {
-        DistanceUnit.KILOMETRES
+        DistanceUnit.KILOMETERS
     }
 
     companion object {
