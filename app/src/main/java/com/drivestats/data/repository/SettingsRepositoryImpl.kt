@@ -47,7 +47,7 @@ class SettingsRepositoryImpl @Inject constructor(
     private fun String?.toDistanceUnit(): DistanceUnit =
         when (this) {
             "KILOMETRES", "KILOMETERS", null -> DistanceUnit.KILOMETERS
-            else -> DistanceUnit.entries.firstOrNull { it.name == this } ?: DistanceUnit.KILOMETERS
+            else -> DistanceUnit.values().firstOrNull { it.name == this } ?: DistanceUnit.KILOMETERS
         }
 
     companion object {

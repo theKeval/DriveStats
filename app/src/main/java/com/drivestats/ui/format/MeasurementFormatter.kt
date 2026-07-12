@@ -39,15 +39,19 @@ private fun formatSpeedDetails(
     distanceUnit: DistanceUnit,
     locale: Locale,
 ): String {
-    val match = speedingPattern.matchEntire(details) ?: return details
-    val sourceValue = match.groupValues[1].toDoubleOrNull() ?: return details
-    val speedKmh = when (match.groupValues[2]) {
-        DistanceUnit.MILES.speedSuffix -> sourceValue * KILOMETERS_PER_MILE
-        else -> sourceValue
-    }
+    val speedKmh = parseStoredSpeedKmh(details) ?: return details
     val convertedValue = when (distanceUnit) {
         DistanceUnit.KILOMETERS -> speedKmh
         DistanceUnit.MILES -> speedKmh / KILOMETERS_PER_MILE
     }
     return String.format(locale, "Speed: %.0f %s", convertedValue, distanceUnit.speedSuffix)
+}
+
+private fun parseStoredSpeedKmh(details: String): Double? {
+    val match = speedingPattern.matchEntire(details) ?: return null
+    val sourceValue = match.groupValues[1].toDoubleOrNull() ?: return null
+    return when (match.groupValues[2]) {
+        DistanceUnit.MILES.speedSuffix -> sourceValue * KILOMETERS_PER_MILE
+        else -> sourceValue
+    }
 }
