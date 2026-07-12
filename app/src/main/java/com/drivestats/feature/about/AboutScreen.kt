@@ -59,7 +59,8 @@ import com.drivestats.ui.theme.AboutSurfaceContainerHigh
 import com.drivestats.ui.theme.AboutSurfaceContainerHighest
 import com.drivestats.ui.theme.DriveStatsTheme
 
-private val AboutLogoTileSize = 100.dp
+private val AboutLogoContainerSize = 100.dp
+private const val AboutBackgroundGradientRadius = 900f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +101,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(AboutPrimary.copy(alpha = 0.06f), AboutSurface),
-                        radius = 900f,
+                        radius = AboutBackgroundGradientRadius,
                     ),
                 )
                 .padding(horizontal = 16.dp),
@@ -109,7 +110,7 @@ fun AboutScreen(onBack: () -> Unit) {
         ) {
             Spacer(Modifier.height(32.dp))
             Surface(
-                modifier = Modifier.size(AboutLogoTileSize),
+                modifier = Modifier.size(AboutLogoContainerSize),
                 shape = CircleShape,
                 color = AboutPrimaryContainer,
             ) {
