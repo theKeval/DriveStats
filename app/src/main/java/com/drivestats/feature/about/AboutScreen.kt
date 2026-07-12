@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,18 +46,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.drivestats.BuildConfig
 import com.drivestats.R
+import com.drivestats.ui.theme.AboutOnSurface
+import com.drivestats.ui.theme.AboutOnSurfaceVariant
+import com.drivestats.ui.theme.AboutOutline
+import com.drivestats.ui.theme.AboutOutlineVariant
+import com.drivestats.ui.theme.AboutPrimary
+import com.drivestats.ui.theme.AboutPrimaryContainer
+import com.drivestats.ui.theme.AboutSurface
+import com.drivestats.ui.theme.AboutSurfaceContainer
+import com.drivestats.ui.theme.AboutSurfaceContainerHigh
+import com.drivestats.ui.theme.AboutSurfaceContainerHighest
 import com.drivestats.ui.theme.DriveStatsTheme
 
-private val AboutSurface = Color(0xFF0E1116)
-private val AboutSurfaceContainer = Color(0xFF161B22)
-private val AboutSurfaceContainerHigh = Color(0xFF1E2530)
-private val AboutSurfaceContainerHighest = Color(0xFF252D3A)
-private val AboutOnSurface = Color(0xFFE3E6EA)
-private val AboutOnSurfaceVariant = Color(0xFFA6ADB8)
-private val AboutOutline = Color(0xFF3A414C)
-private val AboutOutlineVariant = Color(0xFF232933)
-private val AboutPrimary = Color(0xFF00E5B3)
-private val AboutPrimaryContainer = Color(0xFF00513C)
+private val AboutLogoTileSize = 100.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +108,7 @@ fun AboutScreen(onBack: () -> Unit) {
         ) {
             Spacer(Modifier.height(32.dp))
             Surface(
-                modifier = Modifier.size(100.dp),
+                modifier = Modifier.size(AboutLogoTileSize),
                 shape = CircleShape,
                 color = AboutPrimaryContainer,
             )
@@ -196,12 +198,14 @@ private fun AboutGitHubRow(onClick: () -> Unit) {
             color = AboutSurfaceContainerHigh,
             shape = RoundedCornerShape(8.dp),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_about_github),
-                contentDescription = null,
-                modifier = Modifier.padding(6.dp).size(28.dp),
-                tint = Color.Unspecified,
-            )
+            Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_about_github),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = Color.Unspecified,
+                )
+            }
         }
         Text(
             text = stringResource(R.string.about_view_source),
