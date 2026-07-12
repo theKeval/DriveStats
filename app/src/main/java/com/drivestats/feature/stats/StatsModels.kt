@@ -214,7 +214,7 @@ private val longestTripComparator = Comparator<TripSession> { first, second ->
     when {
         first.distanceMeters != second.distanceMeters -> first.distanceMeters.compareTo(second.distanceMeters)
         first.startTimeMs != second.startTimeMs -> second.startTimeMs.compareTo(first.startTimeMs)
-        else -> second.id.compareTo(first.id)
+        else -> first.id.compareTo(second.id)
     }
 }
 
@@ -222,7 +222,7 @@ private val fastestTripComparator = Comparator<Pair<TripSession, Double>> { firs
     when {
         first.second != second.second -> first.second.compareTo(second.second)
         first.first.startTimeMs != second.first.startTimeMs -> second.first.startTimeMs.compareTo(first.first.startTimeMs)
-        else -> second.first.id.compareTo(first.first.id)
+        else -> first.first.id.compareTo(second.first.id)
     }
 }
 

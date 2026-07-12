@@ -58,6 +58,12 @@ fun DriveStatsNavHost(
         Screen.Vehicles.route,
         Screen.Settings.route,
     )
+    val navigateToTopLevel: (String) -> Unit = { route ->
+        navController.navigate(route) {
+            popUpTo(Screen.TripList.route)
+            launchSingleTop = true
+        }
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -66,30 +72,10 @@ fun DriveStatsNavHost(
             if (currentRoute in topLevelRoutes) {
                 MainBottomNavigation(
                     currentRoute = currentRoute,
-                    onTripsClick = {
-                        navController.navigate(Screen.TripList.route) {
-                            popUpTo(Screen.TripList.route)
-                            launchSingleTop = true
-                        }
-                    },
-                    onStatsClick = {
-                        navController.navigate(Screen.Stats.route) {
-                            popUpTo(Screen.TripList.route)
-                            launchSingleTop = true
-                        }
-                    },
-                    onVehiclesClick = {
-                        navController.navigate(Screen.Vehicles.route) {
-                            popUpTo(Screen.TripList.route)
-                            launchSingleTop = true
-                        }
-                    },
-                    onSettingsClick = {
-                        navController.navigate(Screen.Settings.route) {
-                            popUpTo(Screen.TripList.route)
-                            launchSingleTop = true
-                        }
-                    },
+                    onTripsClick = { navigateToTopLevel(Screen.TripList.route) },
+                    onStatsClick = { navigateToTopLevel(Screen.Stats.route) },
+                    onVehiclesClick = { navigateToTopLevel(Screen.Vehicles.route) },
+                    onSettingsClick = { navigateToTopLevel(Screen.Settings.route) },
                 )
             }
         },
@@ -122,12 +108,7 @@ fun DriveStatsNavHost(
                         navController.navigate(Screen.TripDetail.createRoute(tripId))
                     },
                     onInsightsClick = { navController.navigate(Screen.Insights.route) },
-                    onSettingsClick = {
-                        navController.navigate(Screen.Settings.route) {
-                            popUpTo(Screen.TripList.route)
-                            launchSingleTop = true
-                        }
-                    },
+                    onSettingsClick = { navigateToTopLevel(Screen.Settings.route) },
                     onAboutClick = { navController.navigate(Screen.About.route) },
                 )
             }
