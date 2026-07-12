@@ -30,7 +30,7 @@
     <string name="nav_vehicles_content_description">Vehicles</string>
     <string name="nav_settings_content_description">Settings</string>
     <string name="stats_title">Stats</string>
-    <string name="stats_subtitle">All-time · Updated just now</string>
+    <string name="stats_subtitle">All-time overview</string>
     <string name="stats_info_content_description">Stats information</string>
     <string name="stats_glossary_title">Stats glossary</string>
     <string name="stats_glossary_body">Total distance and total driving time are calculated from valid completed trips. Average speed is total distance divided by total driving time. Personal records exclude trips with invalid durations.</string>

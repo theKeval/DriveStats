@@ -268,7 +268,11 @@ private fun StatsPopulatedState(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Outlined.Speed,
                 label = stringResource(R.string.stats_average_speed),
-                value = state.summary.formatAverageSpeed(distanceUnit, locale),
+                value = state.summary.formatAverageSpeed(
+                    distanceUnit = distanceUnit,
+                    locale = locale,
+                    placeholder = stringResource(R.string.stats_no_data_short),
+                ),
             )
         }
 

@@ -114,7 +114,7 @@ fun DriveStatsNavHost(
             }
 
             composable(Screen.Stats.route) {
-                StatsScreen(onStartTripClick = { navController.navigate(Screen.TripList.route) })
+                StatsScreen(onStartTripClick = { navigateToTopLevel(Screen.TripList.route) })
             }
 
             composable(Screen.Vehicles.route) {

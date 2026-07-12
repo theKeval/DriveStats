@@ -109,7 +109,7 @@ internal fun buildStatsSnapshot(
         ?.first
 
     return StatsSnapshot(
-        hasAnyTrips = trips.isNotEmpty(),
+        hasAnyTrips = validTrips.isNotEmpty(),
         hasPartialData = hasPartialData,
         summary = summary,
         chartBars = chartBars,
@@ -136,8 +136,12 @@ internal fun SummaryStats.formatTotalDuration(): String {
     }
 }
 
-internal fun SummaryStats.formatAverageSpeed(distanceUnit: DistanceUnit, locale: Locale): String {
-    val speedMetersPerHour = averageSpeedMetersPerHour ?: return "—"
+internal fun SummaryStats.formatAverageSpeed(
+    distanceUnit: DistanceUnit,
+    locale: Locale,
+    placeholder: String,
+): String {
+    val speedMetersPerHour = averageSpeedMetersPerHour ?: return placeholder
     val speed = speedMetersPerHour.toSpeedIn(distanceUnit)
     return String.format(locale, "%.1f %s", speed, distanceUnit.speedSuffix)
 }
@@ -215,7 +219,8 @@ private val longestTripComparator = Comparator<TripSession> { first, second ->
         first.distanceMeters != second.distanceMeters -> first.distanceMeters.compareTo(second.distanceMeters)
         // Earlier start timestamps win ties, so we intentionally reverse the comparison here.
         first.startTimeMs != second.startTimeMs -> second.startTimeMs.compareTo(first.startTimeMs)
-        else -> first.id.compareTo(second.id)
+        // Lower IDs win ties; reverse here because maxWithOrNull picks the "largest" value.
+        else -> second.id.compareTo(first.id)
     }
 }
 
@@ -224,7 +229,8 @@ private val fastestTripComparator = Comparator<Pair<TripSession, Double>> { firs
         first.second != second.second -> first.second.compareTo(second.second)
         // Earlier start timestamps win ties, so we intentionally reverse the comparison here.
         first.first.startTimeMs != second.first.startTimeMs -> second.first.startTimeMs.compareTo(first.first.startTimeMs)
-        else -> first.first.id.compareTo(second.first.id)
+        // Lower IDs win ties; reverse here because maxWithOrNull picks the "largest" value.
+        else -> second.first.id.compareTo(first.first.id)
     }
 }
 

@@ -40,8 +40,8 @@ class StatsModelsTest {
     fun buildStatsSnapshot_excludesInvalidTripsAndUsesDeterministicTiesForRecords() {
         val sharedStart = Instant.parse("2026-07-08T08:00:00Z").toEpochMilli()
         val trips = listOf(
+            completedTrip(id = 2L, startMs = sharedStart, endMs = sharedStart + 3_600_000L, distanceMeters = 80_000.0),
             completedTrip(id = 1L, startMs = sharedStart, endMs = sharedStart + 3_600_000L, distanceMeters = 80_000.0),
-            completedTrip(id = 2L, startMs = sharedStart + 60_000L, endMs = sharedStart + 3_660_000L, distanceMeters = 80_000.0),
             completedTrip(id = 3L, startMs = sharedStart + 120_000L, endMs = sharedStart + 120_000L, distanceMeters = 100_000.0),
         )
 
@@ -50,6 +50,21 @@ class StatsModelsTest {
         assertThat(snapshot.summary.totalTrips).isEqualTo(2)
         assertThat(snapshot.longestTripRecord?.tripId).isEqualTo(1L)
         assertThat(snapshot.fastestTripRecord?.tripId).isEqualTo(1L)
+        assertThat(snapshot.hasPartialData).isTrue()
+    }
+
+    @Test
+    fun buildStatsSnapshot_allInvalidTripsReportsNoTripsState() {
+        val start = Instant.parse("2026-07-08T08:00:00Z").toEpochMilli()
+        val trips = listOf(
+            completedTrip(id = 1L, startMs = start, endMs = start, distanceMeters = 1_000.0),
+            completedTrip(id = 2L, startMs = start + 60_000L, endMs = start + 60_000L, distanceMeters = 2_000.0),
+        )
+
+        val snapshot = buildStatsSnapshot(trips = trips, now = now, zoneId = zoneId)
+
+        assertThat(snapshot.hasAnyTrips).isFalse()
+        assertThat(snapshot.summary.totalTrips).isEqualTo(0)
         assertThat(snapshot.hasPartialData).isTrue()
     }
 
