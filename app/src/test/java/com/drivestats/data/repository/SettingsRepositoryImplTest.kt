@@ -66,7 +66,7 @@ class SettingsRepositoryImplTest {
     }
 
     @Test
-    fun observeSettings_mapsLegacyKilometresValue() = runTest {
+    fun observeSettings_mapsLegacyKilometersValue() = runTest {
         val file = createTempPreferencesFile()
         val scope = CoroutineScope(StandardTestDispatcher(testScheduler) + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
@@ -127,7 +127,7 @@ class SettingsRepositoryImplTest {
     private fun createTempPreferencesFile(): File =
         Files.createTempFile("settings", ".preferences_pb").toFile()
 
-    // The production preference key is private; tests seed the raw stored value by name to
-    // verify legacy migration behavior at the DataStore boundary.
+    // The production KEY_DISTANCE_UNIT is private; this duplicates its value to seed DataStore
+    // for legacy migration tests.
     private val testDistanceUnitKey = stringPreferencesKey("distance_unit")
 }
