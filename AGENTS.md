@@ -63,14 +63,21 @@ The issue/PR title carries a Jira key like `DRIVE-12`. You MUST:
 1. **Read the whole issue first** — description, acceptance criteria, attached designs.
    Implement exactly what's asked; nothing more. If the issue is ambiguous or infeasible,
    comment on the issue explaining what's unclear instead of guessing wildly.
-2. **Work like a senior engineer:** small focused commits, meaningful messages, tests for
+2. **Check for design artifacts at `docs/design/<JIRA-KEY>/` in the repo** (also linked
+   from the issue's Design section when one exists). If present, they are the source of
+   truth for UI work: `mockup.png` = the exact target UI; `design-spec.md` = exact color
+   tokens, spacing, and type scale — use these values verbatim, do not approximate;
+   `assets/*.svg` = real assets — copy them into the app's resources and use them, do not
+   recreate icons; `mockup.html` = reference implementation to consult for layout/CSS
+   intent. Match the mockup as closely as the platform allows.
+3. **Work like a senior engineer:** small focused commits, meaningful messages, tests for
    new logic, run existing tests/lint before opening the PR.
-3. **Match the codebase.** Detect the project's stack and existing patterns first; follow
+4. **Match the codebase.** Detect the project's stack and existing patterns first; follow
    them. Path-specific instruction files (`.github/instructions/`) override this file.
-4. **PR description must include:** the Jira key, what changed, how it was verified
+5. **PR description must include:** the Jira key, what changed, how it was verified
    (tests run, screenshots for UI), and any acceptance criterion you could NOT meet with
    the reason.
-5. **Open the PR as a draft.**
+6. **Open the PR as a draft.**
 
 ## Clean architecture (all projects)
 
