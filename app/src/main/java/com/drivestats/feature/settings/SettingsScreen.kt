@@ -28,9 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.drivestats.R
@@ -162,11 +160,7 @@ private fun UnitOptionRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        RadioButton(
-            selected = selected,
-            onClick = null,
-            modifier = Modifier.semantics { contentDescription = label },
-        )
+        RadioButton(selected = selected, onClick = null)
         Text(label, style = MaterialTheme.typography.bodyMedium)
     }
 }
