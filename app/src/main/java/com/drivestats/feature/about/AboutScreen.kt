@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -111,9 +112,8 @@ fun AboutScreen(onBack: () -> Unit) {
                 modifier = Modifier.size(AboutLogoTileSize),
                 shape = CircleShape,
                 color = AboutPrimaryContainer,
-            )
-            {
-                androidx.compose.foundation.Image(
+            ) {
+                Image(
                     painter = painterResource(R.drawable.ic_about_logo_mark),
                     contentDescription = stringResource(R.string.about_logo_content_description),
                     modifier = Modifier
