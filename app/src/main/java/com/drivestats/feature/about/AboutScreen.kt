@@ -1,5 +1,6 @@
 package com.drivestats.feature.about
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BorderStroke
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -162,8 +162,9 @@ fun AboutScreen(onBack: () -> Unit) {
             Spacer(Modifier.height(21.dp))
             HorizontalDivider(color = AboutOutlineVariant, thickness = 1.dp)
             Spacer(Modifier.height(11.dp))
+            val gitHubUrl = stringResource(R.string.about_github_url)
             AboutGitHubRow(
-                onClick = { uriHandler.openUri(stringResource(R.string.about_github_url)) },
+                onClick = { uriHandler.openUri(gitHubUrl) },
             )
             Spacer(Modifier.height(19.dp))
             Text(
