@@ -87,7 +87,7 @@ class SettingsRepositoryImplTest {
     }
 
     @Test
-    fun observeSettings_recoversFromIoExceptionWithDefaults() = runTest {
+    fun observeSettings_recoversFromIOExceptionWithDefaults() = runTest {
         val dataStore = mockk<androidx.datastore.core.DataStore<Preferences>>()
         every { dataStore.data } returns flow { throw IOException("corrupted") }
 

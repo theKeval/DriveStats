@@ -11,7 +11,6 @@ import com.drivestats.domain.model.DistanceUnit
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,7 +36,6 @@ class SettingsRepositoryImpl @Inject constructor(
                     distanceUnit = prefs[KEY_DISTANCE_UNIT].toDistanceUnit(),
                 )
             }
-            .distinctUntilChanged()
 
     override fun observeDistanceUnit(): Flow<DistanceUnit> =
         observeSettings()
