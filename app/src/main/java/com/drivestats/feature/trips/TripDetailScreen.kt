@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.drivestats.domain.model.DistanceUnit
 import com.drivestats.domain.model.DrivingEvent
 import com.drivestats.domain.model.EventType
 import com.drivestats.domain.model.TripScore
@@ -199,7 +200,7 @@ private fun scoreColor(score: Float): Color = when {
 @Composable
 private fun EventsCard(
     events: List<DrivingEvent>,
-    distanceUnit: com.drivestats.domain.model.DistanceUnit,
+    distanceUnit: DistanceUnit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
