@@ -213,6 +213,7 @@ private fun TripSession.toPersonalRecord(zoneId: ZoneId): PersonalRecord {
 private val longestTripComparator = Comparator<TripSession> { first, second ->
     when {
         first.distanceMeters != second.distanceMeters -> first.distanceMeters.compareTo(second.distanceMeters)
+        // Earlier start timestamps win ties, so we intentionally reverse the comparison here.
         first.startTimeMs != second.startTimeMs -> second.startTimeMs.compareTo(first.startTimeMs)
         else -> first.id.compareTo(second.id)
     }
@@ -221,6 +222,7 @@ private val longestTripComparator = Comparator<TripSession> { first, second ->
 private val fastestTripComparator = Comparator<Pair<TripSession, Double>> { first, second ->
     when {
         first.second != second.second -> first.second.compareTo(second.second)
+        // Earlier start timestamps win ties, so we intentionally reverse the comparison here.
         first.first.startTimeMs != second.first.startTimeMs -> second.first.startTimeMs.compareTo(first.first.startTimeMs)
         else -> first.first.id.compareTo(second.first.id)
     }
