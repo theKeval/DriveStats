@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.DirectionsCar
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,8 +32,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.drivestats.R
 import com.drivestats.domain.model.TripSession
 import com.drivestats.domain.model.TripState
 import java.text.SimpleDateFormat
@@ -45,6 +48,7 @@ fun TripListScreen(
     onTripClick: (Long) -> Unit,
     onInsightsClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onAboutClick: () -> Unit,
     viewModel: TripListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -55,10 +59,13 @@ fun TripListScreen(
                 title = { Text("DriveStats") },
                 actions = {
                     IconButton(onClick = onInsightsClick) {
-                        Icon(Icons.Outlined.BarChart, contentDescription = "Insights")
+                        Icon(Icons.Outlined.BarChart, contentDescription = stringResource(R.string.insights_icon_description))
                     }
                     IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Outlined.Settings, contentDescription = "Settings")
+                        Icon(Icons.Outlined.Settings, contentDescription = stringResource(R.string.settings_icon_description))
+                    }
+                    IconButton(onClick = onAboutClick) {
+                        Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about_icon_description))
                     }
                 },
             )

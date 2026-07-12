@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.drivestats.feature.about.AboutScreen
 import com.drivestats.feature.insights.InsightsScreen
 import com.drivestats.feature.onboarding.OnboardingScreen
 import com.drivestats.feature.permissions.PermissionsScreen
@@ -22,6 +23,7 @@ sealed class Screen(val route: String) {
     }
     object Insights : Screen("insights")
     object Settings : Screen("settings")
+    object About : Screen("about")
 }
 
 @Composable
@@ -54,6 +56,7 @@ fun DriveStatsNavHost(
                 },
                 onInsightsClick = { navController.navigate(Screen.Insights.route) },
                 onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                onAboutClick = { navController.navigate(Screen.About.route) },
             )
         }
 
@@ -74,6 +77,10 @@ fun DriveStatsNavHost(
 
         composable(Screen.Settings.route) {
             SettingsScreen(onBack = { navController.navigateUp() })
+        }
+
+        composable(Screen.About.route) {
+            AboutScreen(onBack = { navController.navigateUp() })
         }
     }
 }
