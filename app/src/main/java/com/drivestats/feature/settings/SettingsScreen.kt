@@ -38,6 +38,7 @@ import com.drivestats.domain.model.DistanceUnit
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    showBackButton: Boolean = true,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -46,10 +47,14 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                navigationIcon = if (showBackButton) {
+                    {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
                     }
+                } else {
+                    {}
                 },
             )
         },
