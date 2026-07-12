@@ -102,21 +102,20 @@ internal fun buildStatsSnapshot(
         averageSpeedMetersPerHour = avgSpeedMetersPerHour,
     )
 
+    val longestTrip = validTrips.maxWithOrNull(longestTripComparator)
+    val fastestTrip = validTrips
+        .mapNotNull { trip -> trip.averageSpeedMetersPerHour()?.let { trip to it } }
+        .maxWithOrNull(fastestTripComparator)
+        ?.first
+
     return StatsSnapshot(
         hasAnyTrips = trips.isNotEmpty(),
         hasPartialData = hasPartialData,
         summary = summary,
         chartBars = chartBars,
         // Deterministic tie-breaker for equal metrics: earliest trip wins, then lowest ID.
-        longestTripRecord = validTrips
-            .sortedWith(compareByDescending<TripSession> { it.distanceMeters }.thenBy { it.startTimeMs }.thenBy { it.id })
-            .firstOrNull()
-            ?.toPersonalRecord(zoneId),
-        fastestTripRecord = validTrips
-            .filter { it.distanceMeters > 0.0 }
-            .sortedWith(compareByDescending<TripSession> { it.averageSpeedMetersPerHour() ?: 0.0 }.thenBy { it.startTimeMs }.thenBy { it.id })
-            .firstOrNull()
-            ?.toPersonalRecord(zoneId),
+        longestTripRecord = longestTrip?.toPersonalRecord(zoneId),
+        fastestTripRecord = fastestTrip?.toPersonalRecord(zoneId),
     )
 }
 
@@ -209,6 +208,22 @@ private fun TripSession.toPersonalRecord(zoneId: ZoneId): PersonalRecord {
         durationMs = durationMs,
         averageSpeedMetersPerHour = averageSpeedMetersPerHour() ?: 0.0,
     )
+}
+
+private val longestTripComparator = Comparator<TripSession> { first, second ->
+    when {
+        first.distanceMeters != second.distanceMeters -> first.distanceMeters.compareTo(second.distanceMeters)
+        first.startTimeMs != second.startTimeMs -> second.startTimeMs.compareTo(first.startTimeMs)
+        else -> second.id.compareTo(first.id)
+    }
+}
+
+private val fastestTripComparator = Comparator<Pair<TripSession, Double>> { first, second ->
+    when {
+        first.second != second.second -> first.second.compareTo(second.second)
+        first.first.startTimeMs != second.first.startTimeMs -> second.first.startTimeMs.compareTo(first.first.startTimeMs)
+        else -> second.first.id.compareTo(first.first.id)
+    }
 }
 
 enum class RecordType {

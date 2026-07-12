@@ -122,7 +122,12 @@ fun DriveStatsNavHost(
                         navController.navigate(Screen.TripDetail.createRoute(tripId))
                     },
                     onInsightsClick = { navController.navigate(Screen.Insights.route) },
-                    onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                    onSettingsClick = {
+                        navController.navigate(Screen.Settings.route) {
+                            popUpTo(Screen.TripList.route)
+                            launchSingleTop = true
+                        }
+                    },
                     onAboutClick = { navController.navigate(Screen.About.route) },
                 )
             }

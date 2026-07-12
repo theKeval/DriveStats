@@ -62,6 +62,8 @@ import kotlin.math.roundToInt
 private val LoadingSummaryCardHeight = 140.dp
 private val LoadingChartCardHeight = 220.dp
 private val LoadingRecordsCardHeight = 180.dp
+private const val MinKnownBarHeightFraction = 0.03f
+private const val MissingDataBarHeightFraction = 0.05f
 
 @Composable
 fun StatsScreen(
@@ -382,9 +384,9 @@ private fun LastSevenDaysChart(
                             contentAlignment = Alignment.BottomCenter,
                         ) {
                             val barHeightFraction = bar.distanceMeters?.let {
-                                // Keep a minimum visible bar height for zero-distance days.
-                                ((it / maxDistance).toFloat()).coerceIn(0.03f, 1f)
-                            } ?: 0.05f
+                                // Keep a small minimum bar height so very small values stay visible.
+                                ((it / maxDistance).toFloat()).coerceIn(MinKnownBarHeightFraction, 1f)
+                            } ?: MissingDataBarHeightFraction
                             val barColor = if (bar.isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer
                             val barModifier = Modifier
                                 .fillMaxWidth()
