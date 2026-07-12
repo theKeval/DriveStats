@@ -3,7 +3,9 @@ package com.drivestats.feature.trips
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.drivestats.data.repository.SettingsRepository
 import com.drivestats.data.repository.TripRepository
+import com.drivestats.domain.model.DistanceUnit
 import com.drivestats.domain.model.DrivingEvent
 import com.drivestats.domain.model.TripScore
 import com.drivestats.domain.model.TripSession
@@ -19,6 +21,7 @@ data class TripDetailUiState(
     val trip: TripSession? = null,
     val events: List<DrivingEvent> = emptyList(),
     val score: TripScore? = null,
+    val distanceUnit: DistanceUnit = DistanceUnit.KILOMETRES,
     val isLoading: Boolean = true,
 )
 
@@ -26,6 +29,7 @@ data class TripDetailUiState(
 class TripDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val tripRepository: TripRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val tripId: Long = checkNotNull(savedStateHandle["tripId"])
@@ -34,11 +38,13 @@ class TripDetailViewModel @Inject constructor(
         tripRepository.observeTrip(tripId),
         tripRepository.observeEventsForTrip(tripId),
         tripRepository.observeScoreForTrip(tripId),
-    ) { trip, events, score ->
+        settingsRepository.observeDistanceUnit(),
+    ) { trip, events, score, distanceUnit ->
         TripDetailUiState(
             trip = trip,
             events = events,
             score = score,
+            distanceUnit = distanceUnit,
             isLoading = false,
         )
     }.stateIn(

@@ -40,6 +40,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.drivestats.domain.model.DrivingEvent
 import com.drivestats.domain.model.EventType
 import com.drivestats.domain.model.TripScore
+import com.drivestats.ui.format.formatDistance
+import com.drivestats.ui.format.formatDrivingEventDetails
 import com.drivestats.ui.theme.ScoreExcellent
 import com.drivestats.ui.theme.ScoreFair
 import com.drivestats.ui.theme.ScoreGood
@@ -91,7 +93,7 @@ fun TripDetailScreen(
                 val formatter = SimpleDateFormat("EEEE, MMMM d, yyyy · h:mm a", Locale.getDefault())
                 Text(formatter.format(Date(trip.startTimeMs)), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "${"%.1f".format(trip.distanceMeters / 1000.0)} km",
+                    formatDistance(trip.distanceMeters, state.distanceUnit),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -102,7 +104,10 @@ fun TripDetailScreen(
             }
 
             if (state.events.isNotEmpty()) {
-                EventsCard(events = state.events)
+                EventsCard(
+                    events = state.events,
+                    distanceUnit = state.distanceUnit,
+                )
             }
         }
     }
@@ -192,7 +197,10 @@ private fun scoreColor(score: Float): Color = when {
 }
 
 @Composable
-private fun EventsCard(events: List<DrivingEvent>) {
+private fun EventsCard(
+    events: List<DrivingEvent>,
+    distanceUnit: com.drivestats.domain.model.DistanceUnit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
@@ -202,8 +210,11 @@ private fun EventsCard(events: List<DrivingEvent>) {
             events.forEach { event ->
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(event.type.displayName(), style = MaterialTheme.typography.bodyMedium)
-                    Text(event.details, style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        formatDrivingEventDetails(event, distanceUnit),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
