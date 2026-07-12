@@ -99,7 +99,8 @@ fun SettingsScreen(
 }
 
 /**
- * Renders the explicit two-option unit selector used by Settings for distance and speed display.
+ * Renders the explicit two-option unit selector used by Settings for distance and speed display
+ * as an accessible radio-button group.
  *
  * @param title Section label shown above the options.
  * @param subtitle Supporting text describing what the preference affects.

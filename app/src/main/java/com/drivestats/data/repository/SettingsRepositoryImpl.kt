@@ -43,6 +43,7 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[KEY_DISTANCE_UNIT] = distanceUnit.name }
     }
 
+    // "KILOMETRES" is the legacy stored spelling; keep mapping it to the renamed enum value.
     private fun String?.toDistanceUnit(): DistanceUnit =
         when (this) {
             "KILOMETRES", "KILOMETERS", null -> DistanceUnit.KILOMETERS
