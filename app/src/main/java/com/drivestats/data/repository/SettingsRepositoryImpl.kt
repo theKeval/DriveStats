@@ -3,11 +3,14 @@ package com.drivestats.data.repository
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.drivestats.domain.model.AppSettings
 import com.drivestats.domain.model.DistanceUnit
+import java.io.IOException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -18,13 +21,23 @@ class SettingsRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) : SettingsRepository {
 
-    override fun observeSettings(): Flow<AppSettings> = dataStore.data.map { prefs ->
-        AppSettings(
-            autoDetectEnabled = prefs[KEY_AUTO_DETECT] ?: true,
-            cloudSyncEnabled = prefs[KEY_CLOUD_SYNC] ?: false,
-            distanceUnit = prefs[KEY_DISTANCE_UNIT].toDistanceUnit(),
-        )
-    }
+    override fun observeSettings(): Flow<AppSettings> =
+        dataStore.data
+            .catch { throwable ->
+                if (throwable is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw throwable
+                }
+            }
+            .map { prefs ->
+                AppSettings(
+                    autoDetectEnabled = prefs[KEY_AUTO_DETECT] ?: true,
+                    cloudSyncEnabled = prefs[KEY_CLOUD_SYNC] ?: false,
+                    distanceUnit = prefs[KEY_DISTANCE_UNIT].toDistanceUnit(),
+                )
+            }
+            .distinctUntilChanged()
 
     override fun observeDistanceUnit(): Flow<DistanceUnit> =
         observeSettings()
@@ -47,7 +60,8 @@ class SettingsRepositoryImpl @Inject constructor(
     private fun String?.toDistanceUnit(): DistanceUnit =
         when (this) {
             "KILOMETRES", "KILOMETERS", null -> DistanceUnit.KILOMETERS
-            else -> DistanceUnit.values().firstOrNull { it.name == this } ?: DistanceUnit.KILOMETERS
+            "MILES" -> DistanceUnit.MILES
+            else -> DistanceUnit.KILOMETERS
         }
 
     companion object {
