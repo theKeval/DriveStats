@@ -114,8 +114,9 @@ jobs:
           }
 
           # candidate PRs: open PRs authored by the coding agent, or already carrying router labels
+          # NOTE: REST reports the coding agent's login as "Copilot" (GraphQL shows copilot-swe-agent) — accept both.
           PRS=$(gh api "/repos/$REPO/pulls?state=open&per_page=50" --jq \
-            '[.[] | select((.user.login=="copilot-swe-agent") or any(.labels[].name; IN("copilot-review-requested","fix-dispatched","ready-for-human"))) | .number] | unique | .[]')
+            '[.[] | select((.user.login=="Copilot") or (.user.login=="copilot-swe-agent") or any(.labels[].name; IN("copilot-review-requested","fix-dispatched","ready-for-human"))) | .number] | unique | .[]')
           [ -z "$PRS" ] && { echo "no candidate PRs — nothing to do"; exit 0; }
 
           for PR in $PRS; do
