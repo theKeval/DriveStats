@@ -5,10 +5,10 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import com.drivestats.domain.model.DistanceUnit
-import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
+import kotlin.test.assertFailsWith
 import org.junit.Test
 
 class SettingsRepositoryImplTest {
@@ -104,11 +105,8 @@ class SettingsRepositoryImplTest {
         val dataStore = mockk<DataStore<Preferences>>()
         every { dataStore.data } returns flow { throw IllegalStateException("boom") }
 
-        val thrown: IllegalStateException = try {
+        val thrown = assertFailsWith<IllegalStateException> {
             SettingsRepositoryImpl(dataStore).observeSettings().first()
-            throw AssertionError("Expected IllegalStateException")
-        } catch (error: IllegalStateException) {
-            error
         }
 
         assertThat(thrown).hasMessageThat().isEqualTo("boom")
