@@ -98,6 +98,14 @@ fun SettingsScreen(
     }
 }
 
+/**
+ * Renders the explicit two-option unit selector used by Settings for distance and speed display.
+ *
+ * @param title Section label shown above the options.
+ * @param subtitle Supporting text describing what the preference affects.
+ * @param selectedUnit The currently persisted unit choice.
+ * @param onUnitSelected Callback invoked when the user picks a different unit.
+ */
 @Composable
 private fun UnitPreferenceRow(
     title: String,

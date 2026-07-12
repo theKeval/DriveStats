@@ -8,6 +8,7 @@ import java.util.Locale
 private const val METERS_PER_KILOMETER = 1000.0
 private const val METERS_PER_MILE = 1609.344
 private const val KILOMETERS_PER_MILE = 1.609344
+// Matches the currently stored speeding detail format, e.g. "Speed: 120 km/h" or "Speed: 75 mph".
 private val speedingPattern = Regex("""^Speed: ([0-9]+(?:\.[0-9]+)?) (km/h|mph)$""")
 
 fun formatDistance(

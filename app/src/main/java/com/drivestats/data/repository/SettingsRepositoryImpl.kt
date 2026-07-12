@@ -43,14 +43,11 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { it[KEY_DISTANCE_UNIT] = distanceUnit.name }
     }
 
-    private fun String?.toDistanceUnit(): DistanceUnit = try {
+    private fun String?.toDistanceUnit(): DistanceUnit =
         when (this) {
             "KILOMETRES", "KILOMETERS", null -> DistanceUnit.KILOMETERS
-            else -> DistanceUnit.valueOf(this)
+            else -> DistanceUnit.entries.firstOrNull { it.name == this } ?: DistanceUnit.KILOMETERS
         }
-    } catch (_: IllegalArgumentException) {
-        DistanceUnit.KILOMETERS
-    }
 
     companion object {
         private val KEY_AUTO_DETECT = booleanPreferencesKey("auto_detect")
