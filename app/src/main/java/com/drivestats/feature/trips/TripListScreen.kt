@@ -36,8 +36,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.drivestats.R
+import com.drivestats.domain.model.DistanceUnit
 import com.drivestats.domain.model.TripSession
 import com.drivestats.domain.model.TripState
+import com.drivestats.ui.format.formatDistance
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -86,7 +88,11 @@ fun TripListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(state.trips, key = { it.id }) { trip ->
-                    TripCard(trip = trip, onClick = { onTripClick(trip.id) })
+                    TripCard(
+                        trip = trip,
+                        distanceUnit = state.distanceUnit,
+                        onClick = { onTripClick(trip.id) },
+                    )
                 }
             }
         }
@@ -94,7 +100,11 @@ fun TripListScreen(
 }
 
 @Composable
-private fun TripCard(trip: TripSession, onClick: () -> Unit) {
+private fun TripCard(
+    trip: TripSession,
+    distanceUnit: DistanceUnit,
+    onClick: () -> Unit,
+) {
     val formatter = SimpleDateFormat("EEE, MMM d · h:mm a", Locale.getDefault())
     val startLabel = formatter.format(Date(trip.startTimeMs))
     val stateLabel = when (trip.state) {
@@ -103,7 +113,6 @@ private fun TripCard(trip: TripSession, onClick: () -> Unit) {
         TripState.COMPLETED -> trip.score?.let { "★ ${"%.1f".format(it.starRating)}" } ?: "Scoring…"
         TripState.DISCARDED -> "Discarded"
     }
-    val distanceKm = trip.distanceMeters / 1000.0
 
     Card(modifier = Modifier
         .fillMaxWidth()
@@ -124,7 +133,7 @@ private fun TripCard(trip: TripSession, onClick: () -> Unit) {
                 Spacer(Modifier.height(4.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "${"%.1f".format(distanceKm)} km",
+                        formatDistance(trip.distanceMeters, distanceUnit),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

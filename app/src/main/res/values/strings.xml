@@ -17,6 +17,10 @@
     <string name="about_footer">© 2026 DriveStats · Built for drivers, by drivers.</string>
     <string name="settings_icon_description">Settings</string>
     <string name="insights_icon_description">Insights</string>
+    <string name="settings_distance_unit_title">Units</string>
+    <string name="settings_distance_unit_subtitle">Choose how distances and speeding values are shown.</string>
+    <string name="settings_unit_kilometres">Kilometres (km)</string>
+    <string name="settings_unit_miles">Miles (mi)</string>
 
     <!-- Permissions -->
     <string name="permission_location_title">Precise location</string>

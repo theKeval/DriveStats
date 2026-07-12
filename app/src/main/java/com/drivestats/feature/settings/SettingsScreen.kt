@@ -1,5 +1,7 @@
 package com.drivestats.feature.settings
 
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -24,8 +27,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.drivestats.R
+import com.drivestats.domain.model.DistanceUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +64,13 @@ fun SettingsScreen(
             Spacer(Modifier.height(8.dp))
 
             SectionHeader("Trip tracking")
+            UnitPreferenceRow(
+                title = stringResource(R.string.settings_distance_unit_title),
+                subtitle = stringResource(R.string.settings_distance_unit_subtitle),
+                selectedUnit = state.distanceUnit,
+                onUnitSelected = viewModel::setDistanceUnit,
+            )
+            HorizontalDivider()
             SettingsToggleRow(
                 title = "Auto-detect trips",
                 subtitle = "Automatically start recording when you get in a vehicle",
@@ -81,6 +95,73 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+/**
+ * Renders the explicit two-option unit selector used by Settings for distance and speed display
+ * as an accessible radio-button group.
+ *
+ * @param title Section label shown above the options.
+ * @param subtitle Supporting text describing what the preference affects.
+ * @param selectedUnit The currently persisted unit choice.
+ * @param onUnitSelected Callback invoked when the user picks a different unit.
+ */
+@Composable
+private fun UnitPreferenceRow(
+    title: String,
+    subtitle: String,
+    selectedUnit: DistanceUnit,
+    onUnitSelected: (DistanceUnit) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+    ) {
+        Text(title, style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(2.dp))
+        Text(
+            subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
+        Column(modifier = Modifier.selectableGroup()) {
+            UnitOptionRow(
+                label = stringResource(R.string.settings_unit_kilometres),
+                selected = selectedUnit == DistanceUnit.KILOMETERS,
+                onClick = { onUnitSelected(DistanceUnit.KILOMETERS) },
+            )
+            UnitOptionRow(
+                label = stringResource(R.string.settings_unit_miles),
+                selected = selectedUnit == DistanceUnit.MILES,
+                onClick = { onUnitSelected(DistanceUnit.MILES) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun UnitOptionRow(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = selected,
+                onClick = onClick,
+                role = Role.RadioButton,
+            )
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Text(label, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
