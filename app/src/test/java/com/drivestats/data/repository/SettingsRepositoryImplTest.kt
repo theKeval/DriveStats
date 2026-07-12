@@ -99,6 +99,21 @@ class SettingsRepositoryImplTest {
         assertThat(settings.distanceUnit).isEqualTo(DistanceUnit.KILOMETERS)
     }
 
+    @Test
+    fun observeSettings_rethrowsNonIOException() = runTest {
+        val dataStore = mockk<DataStore<Preferences>>()
+        every { dataStore.data } returns flow { throw IllegalStateException("boom") }
+
+        val thrown: IllegalStateException = try {
+            SettingsRepositoryImpl(dataStore).observeSettings().first()
+            throw AssertionError("Expected IllegalStateException")
+        } catch (error: IllegalStateException) {
+            error
+        }
+
+        assertThat(thrown).hasMessageThat().isEqualTo("boom")
+    }
+
     private fun createRepository(
         file: File,
         scheduler: TestCoroutineScheduler,
