@@ -33,9 +33,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,6 +82,7 @@ private fun StatsScreenContent(
 ) {
     val locale = Locale.getDefault()
     val distanceUnit = state.distanceUnit
+    var showGlossary by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -91,7 +97,7 @@ private fun StatsScreenContent(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { showGlossary = true }) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = stringResource(R.string.stats_info_content_description),
@@ -115,6 +121,18 @@ private fun StatsScreenContent(
                 distanceUnit = distanceUnit,
             )
         }
+    }
+    if (showGlossary) {
+        AlertDialog(
+            onDismissRequest = { showGlossary = false },
+            confirmButton = {
+                TextButton(onClick = { showGlossary = false }) {
+                    Text(text = stringResource(R.string.stats_glossary_dismiss))
+                }
+            },
+            title = { Text(text = stringResource(R.string.stats_glossary_title)) },
+            text = { Text(text = stringResource(R.string.stats_glossary_body)) },
+        )
     }
 }
 
@@ -364,6 +382,7 @@ private fun LastSevenDaysChart(
                             contentAlignment = Alignment.BottomCenter,
                         ) {
                             val barHeightFraction = bar.distanceMeters?.let {
+                                // Keep a minimum visible bar height for zero-distance days.
                                 ((it / maxDistance).toFloat()).coerceIn(0.03f, 1f)
                             } ?: 0.05f
                             val barColor = if (bar.isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer

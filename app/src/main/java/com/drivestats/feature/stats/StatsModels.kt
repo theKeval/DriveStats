@@ -107,6 +107,7 @@ internal fun buildStatsSnapshot(
         hasPartialData = hasPartialData,
         summary = summary,
         chartBars = chartBars,
+        // Deterministic tie-breaker for equal metrics: earliest trip wins, then lowest ID.
         longestTripRecord = validTrips
             .sortedWith(compareByDescending<TripSession> { it.distanceMeters }.thenBy { it.startTimeMs }.thenBy { it.id })
             .firstOrNull()
@@ -172,6 +173,10 @@ internal fun formatDuration(durationMs: Long): String {
     return if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
 }
 
+/**
+ * A trip is valid for statistics only when it is completed, not marked as passenger,
+ * has non-negative recorded distance, and has a strictly positive duration.
+ */
 private fun TripSession.isValidForStats(): Boolean {
     val end = endTimeMs ?: return false
     return state == TripState.COMPLETED &&

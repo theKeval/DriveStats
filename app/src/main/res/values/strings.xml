@@ -32,6 +32,9 @@
     <string name="stats_title">Stats</string>
     <string name="stats_subtitle">All-time · Updated just now</string>
     <string name="stats_info_content_description">Stats information</string>
+    <string name="stats_glossary_title">Stats glossary</string>
+    <string name="stats_glossary_body">Total distance and total driving time are calculated from valid completed trips. Average speed is total distance divided by total driving time. Personal records exclude trips with invalid durations.</string>
+    <string name="stats_glossary_dismiss">Got it</string>
     <string name="stats_no_trips_title">No trips recorded yet</string>
     <string name="stats_no_trips_body">Start a drive and DriveStats will build your all-time totals, weekly trend, and personal records automatically.</string>
     <string name="stats_start_trip">Start a Trip</string>
