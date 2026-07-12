@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DriveStats — Stats Dashboard (Loading · Dark)</title>
+<style>
+  :root{
+    --surface: #121318; --surface-container-low: #1A1B21; --surface-container: #1D1E25;
+    --surface-container-high: #262832; --on-surface: #E3E2E9; --on-surface-variant: #C5C6D0;
+    --outline-variant: #45464F; --primary: #AEC6FF; --secondary-container:#404659;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ width:1080px; height:2400px; overflow:hidden; background:var(--surface);
+    font-family: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif; color:var(--on-surface); }
+  .app{ position:relative; width:1080px; height:2400px; }
+  .topbar{ position:absolute; top:0; left:0; width:1080px; height:168px; display:flex; align-items:center;
+    padding:0 48px; }
+  .topbar h1{ font-size:34px; font-weight:500; }
+  .content{ position:absolute; top:168px; left:0; width:1080px; height:1992px; padding:8px 48px 0 48px; }
+  .section-label{ font-size:24px; font-weight:500; margin-bottom:20px; }
+  @keyframes shimmer{ 0%{ background-position:-400px 0;} 100%{ background-position:400px 0;} }
+  .skel{ background:linear-gradient(90deg, var(--surface-container-low) 25%, var(--surface-container-high) 50%, var(--surface-container-low) 75%);
+    background-size:800px 100%; animation:shimmer 1.4s infinite linear; border-radius:28px; }
+  .summary-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:44px; }
+  .stat-skel{ height:216px; }
+  .chart-skel{ height:452px; margin-bottom:44px; }
+  .records-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .record-skel{ height:296px; }
+  .bottomnav{ position:absolute; bottom:0; left:0; width:1080px; height:240px; background:var(--surface-container);
+    border-top:1px solid var(--outline-variant); display:flex; align-items:center; justify-content:space-around; }
+  .nav-item{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .nav-item .pill{ width:112px; height:52px; border-radius:26px; }
+  .nav-item.active .pill{ background:var(--secondary-container); }
+  .nav-label{ font-size:20px; font-weight:500; color:var(--on-surface-variant); }
+  .nav-item.active .nav-label{ color:var(--on-surface); font-weight:700; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar"><h1>Stats</h1></div>
+    <div class="content">
+      <div class="section-label">Overview</div>
+      <div class="summary-grid">
+        <div class="skel stat-skel"></div><div class="skel stat-skel"></div>
+        <div class="skel stat-skel"></div><div class="skel stat-skel"></div>
+      </div>
+      <div class="skel chart-skel"></div>
+      <div class="section-label">Personal records</div>
+      <div class="records-grid">
+        <div class="skel record-skel"></div><div class="skel record-skel"></div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item"><div class="pill" style="background:#262832"></div><div class="nav-label">Trips</div></div>
+      <div class="nav-item active"><div class="pill"></div><div class="nav-label">Stats</div></div>
+      <div class="nav-item"><div class="pill" style="background:#262832"></div><div class="nav-label">Vehicles</div></div>
+      <div class="nav-item"><div class="pill" style="background:#262832"></div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</body>
+</html>

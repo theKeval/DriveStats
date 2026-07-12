@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DriveStats — Stats Dashboard (No trips · Dark)</title>
+<style>
+  :root{
+    --surface: #121318; --surface-container-low: #1A1B21; --surface-container: #1D1E25;
+    --on-surface: #E3E2E9; --on-surface-variant: #C5C6D0; --outline-variant: #45464F;
+    --primary: #AEC6FF; --secondary-container:#404659;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ width:1080px; height:2400px; overflow:hidden; background:var(--surface);
+    font-family: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif; color:var(--on-surface); }
+  .app{ position:relative; width:1080px; height:2400px; }
+  .topbar{ position:absolute; top:0; left:0; width:1080px; height:168px; display:flex; align-items:center;
+    padding:0 48px; }
+  .topbar h1{ font-size:34px; font-weight:500; }
+  .empty{ position:absolute; top:168px; left:0; width:1080px; height:1992px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 96px; gap:28px; text-align:center; }
+  .empty img{ width:200px; height:200px; }
+  .empty h2{ font-size:30px; font-weight:500; }
+  .empty p{ font-size:22px; color:var(--on-surface-variant); line-height:1.5; max-width:760px; }
+  .cta{ margin-top:12px; padding:18px 36px; border-radius:24px; background:var(--primary); color:#0A305F;
+    font-size:22px; font-weight:600; }
+  .bottomnav{ position:absolute; bottom:0; left:0; width:1080px; height:240px; background:var(--surface-container);
+    border-top:1px solid var(--outline-variant); display:flex; align-items:center; justify-content:space-around; }
+  .nav-item{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .nav-item .pill{ width:112px; height:52px; border-radius:26px; display:flex; align-items:center; justify-content:center;}
+  .nav-item.active .pill{ background:var(--secondary-container); }
+  .nav-item img.icon{ width:34px; height:34px; }
+  .nav-label{ font-size:20px; font-weight:500; color:var(--on-surface-variant); }
+  .nav-item.active .nav-label{ color:var(--on-surface); font-weight:700; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar"><h1>Stats</h1></div>
+    <div class="empty">
+      <img src="../assets/il_no_trips.svg" alt="">
+      <h2>No trips recorded yet</h2>
+      <p>Start a drive and DriveStats will build your all-time totals, weekly trend, and personal records automatically.</p>
+      <div class="cta">Start a Trip</div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item"><div class="pill"><img class="icon" src="../assets/ic_nav_trips.svg"></div><div class="nav-label">Trips</div></div>
+      <div class="nav-item active"><div class="pill"><img class="icon" src="../assets/ic_nav_stats.svg"></div><div class="nav-label">Stats</div></div>
+      <div class="nav-item"><div class="pill"><img class="icon" src="../assets/ic_nav_vehicles.svg"></div><div class="nav-label">Vehicles</div></div>
+      <div class="nav-item"><div class="pill"><img class="icon" src="../assets/ic_nav_settings.svg"></div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</body>
+</html>

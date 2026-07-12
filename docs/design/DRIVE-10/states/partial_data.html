@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DriveStats — Stats Dashboard (Partial data · Dark)</title>
+<style>
+  :root{
+    --surface: #121318; --surface-container-low: #1A1B21; --surface-container: #1D1E25;
+    --surface-container-high: #262832; --on-surface: #E3E2E9; --on-surface-variant: #C5C6D0;
+    --outline: #8F909A; --outline-variant: #45464F; --primary: #AEC6FF; --on-primary:#0A305F;
+    --primary-container:#284777; --secondary-container:#404659; --tertiary-container:#5C4300;
+    --error-container:#5B2323; --on-error-container:#FFDAD6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ width:1080px; height:2400px; overflow:hidden; background:var(--surface);
+    font-family: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif; color:var(--on-surface); }
+  .app{ position:relative; width:1080px; height:2400px; }
+  .topbar{ position:absolute; top:0; left:0; width:1080px; height:168px; display:flex; align-items:center; padding:0 48px; }
+  .topbar h1{ font-size:34px; font-weight:500; }
+  .content{ position:absolute; top:168px; left:0; width:1080px; height:1992px; padding:8px 48px 0 48px; }
+  .banner{ display:flex; align-items:center; gap:16px; background:var(--error-container); color:var(--on-error-container);
+    border-radius:20px; padding:18px 22px; margin-bottom:28px; font-size:20px; }
+  .banner img{ width:26px; height:26px; }
+  .section-label{ font-size:24px; font-weight:500; margin-bottom:20px; }
+  .summary-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:36px; }
+  .stat-card{ background:var(--surface-container-low); border-radius:28px; padding:28px 26px;
+    display:flex; flex-direction:column; gap:14px; height:216px; justify-content:space-between; }
+  .stat-card .icon-wrap{ width:56px; height:56px; border-radius:16px; background:var(--primary-container);
+    display:flex; align-items:center; justify-content:center; }
+  .stat-card .icon-wrap img{ width:28px; height:28px; filter:brightness(0) saturate(100%) invert(90%) sepia(15%) saturate(700%) hue-rotate(190deg); }
+  .stat-card .value{ font-size:44px; font-weight:600; }
+  .stat-card .label{ font-size:22px; color:var(--on-surface-variant); }
+  .chart-card{ background:var(--surface-container-low); border-radius:28px; padding:32px; margin-bottom:36px; }
+  .chart-card h2{ font-size:26px; font-weight:500; margin-bottom:24px; }
+  .chart-area{ display:flex; align-items:flex-end; justify-content:space-between; height:300px; padding:0 4px; }
+  .bar-col{ display:flex; flex-direction:column; align-items:center; width:110px; gap:10px; }
+  .bar-track{ width:56px; height:230px; display:flex; align-items:flex-end; }
+  .bar{ width:56px; border-radius:12px 12px 6px 6px; background:var(--secondary-container); }
+  .bar.today{ background:var(--primary); }
+  .bar.nodata{ background:transparent; border:2px dashed var(--outline); height:6px !important; align-self:flex-end; }
+  .day-label{ font-size:20px; color:var(--on-surface-variant); font-weight:500; }
+  .day-label.dim{ opacity:0.55; }
+  .bar-col.today .day-label{ color:var(--primary); font-weight:700; }
+  .records-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .record-card{ background:var(--surface-container-low); border-radius:28px; padding:28px 26px;
+    display:flex; flex-direction:column; gap:16px; height:296px; }
+  .record-card .rec-head{ display:flex; align-items:center; gap:14px; }
+  .record-card .rec-icon{ width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    background:var(--tertiary-container); }
+  .record-card .rec-icon img{ width:26px; height:26px; filter:brightness(0) saturate(100%) invert(90%) sepia(35%) saturate(500%) hue-rotate(340deg); }
+  .record-card .rec-title{ font-size:22px; font-weight:500; color:var(--on-surface-variant); }
+  .record-card .rec-value{ font-size:46px; font-weight:600; }
+  .record-card .rec-meta{ font-size:20px; color:var(--on-surface-variant); line-height:1.5; }
+  .record-card.pending{ align-items:center; justify-content:center; text-align:center; gap:12px; }
+  .record-card.pending .rec-title{ font-size:22px; }
+  .record-card.pending .rec-meta{ font-size:19px; }
+  .bottomnav{ position:absolute; bottom:0; left:0; width:1080px; height:240px; background:var(--surface-container);
+    border-top:1px solid var(--outline-variant); display:flex; align-items:center; justify-content:space-around; }
+  .nav-item{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .nav-item .pill{ width:112px; height:52px; border-radius:26px; display:flex; align-items:center; justify-content:center; }
+  .nav-item.active .pill{ background:var(--secondary-container); }
+  .nav-item img.icon{ width:34px; height:34px; }
+  .nav-label{ font-size:20px; font-weight:500; color:var(--on-surface-variant); }
+  .nav-item.active .nav-label{ color:var(--on-surface); font-weight:700; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar"><h1>Stats</h1></div>
+    <div class="content">
+      <div class="banner"><img src="../assets/ic_warning.svg" alt="">Some recent trips are still syncing — totals may update shortly.</div>
+      <div class="summary-grid">
+        <div class="stat-card">
+          <div class="icon-wrap"><img src="../assets/ic_distance.svg"></div>
+          <div><div class="value">12,401 mi</div><div class="label">Total distance</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="icon-wrap"><img src="../assets/ic_trips.svg"></div>
+          <div><div class="value">481</div><div class="label">Total trips</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="icon-wrap"><img src="../assets/ic_time.svg"></div>
+          <div><div class="value">310h 05m</div><div class="label">Total driving time</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="icon-wrap"><img src="../assets/ic_speed.svg"></div>
+          <div><div class="value">40.0 mph</div><div class="label">Average speed</div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h2>Last 7 days</h2>
+        <div class="chart-area">
+          <div class="bar-col"><div class="bar-track"><div class="bar nodata"></div></div><div class="day-label dim">Mon</div></div>
+          <div class="bar-col"><div class="bar-track"><div class="bar nodata"></div></div><div class="day-label dim">Tue</div></div>
+          <div class="bar-col"><div class="bar-track"><div class="bar" style="height:44%"></div></div><div class="day-label">Wed</div></div>
+          <div class="bar-col"><div class="bar-track"><div class="bar" style="height:100%"></div></div><div class="day-label">Thu</div></div>
+          <div class="bar-col"><div class="bar-track"><div class="bar" style="height:20%"></div></div><div class="day-label">Fri</div></div>
+          <div class="bar-col"><div class="bar-track"><div class="bar" style="height:55%"></div></div><div class="day-label">Sat</div></div>
+          <div class="bar-col today"><div class="bar-track"><div class="bar today" style="height:30%"></div></div><div class="day-label">Today</div></div>
+        </div>
+      </div>
+      <div class="section-label">Personal records</div>
+      <div class="records-grid">
+        <div class="record-card">
+          <div class="rec-head"><div class="rec-icon"><img src="../assets/ic_trophy.svg"></div><div class="rec-title">Longest trip</div></div>
+          <div class="rec-value">187.4 mi</div>
+          <div class="rec-meta">Mar 14, 2025 · 3h 12m<br>Avg 58.4 mph</div>
+        </div>
+        <div class="record-card pending">
+          <div class="rec-icon"><img src="../assets/ic_bolt.svg"></div>
+          <div class="rec-title">Fastest avg speed</div>
+          <div class="rec-meta">Not enough synced data yet —<br>check back after your next sync.</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item"><div class="pill"><img class="icon" src="../assets/ic_nav_trips.svg"></div><div class="nav-label">Trips</div></div>
+      <div class="nav-item active"><div class="pill"><img class="icon" src="../assets/ic_nav_stats.svg"></div><div class="nav-label">Stats</div></div>
+      <div class="nav-item"><div class="pill"><img class="icon" src="../assets/ic_nav_vehicles.svg"></div><div class="nav-label">Vehicles</div></div>
+      <div class="nav-item"><div class="pill"><img class="icon" src="../assets/ic_nav_settings.svg"></div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</body>
+</html>
