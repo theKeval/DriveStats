@@ -1,5 +1,6 @@
 package com.drivestats.data.repository
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -88,7 +89,7 @@ class SettingsRepositoryImplTest {
 
     @Test
     fun observeSettings_recoversFromIOExceptionWithDefaults() = runTest {
-        val dataStore = mockk<androidx.datastore.core.DataStore<Preferences>>()
+        val dataStore = mockk<DataStore<Preferences>>()
         every { dataStore.data } returns flow { throw IOException("corrupted") }
 
         val settings = SettingsRepositoryImpl(dataStore).observeSettings().first()

@@ -36,15 +36,23 @@ class MeasurementFormatterTest {
 
     @Test
     fun formatDrivingEventDetails_returnsOriginalTextWhenSpeedingFormatIsUnknown() {
-        val event = DrivingEvent(
+        val firstEvent = DrivingEvent(
             tripId = 1L,
             type = EventType.SPEEDING,
             timestampMs = 0L,
             details = "Exceeded limit by 20 km/h",
         )
+        val secondEvent = DrivingEvent(
+            tripId = 1L,
+            type = EventType.SPEEDING,
+            timestampMs = 0L,
+            details = "Speed: fast",
+        )
 
-        assertThat(formatDrivingEventDetails(event, DistanceUnit.MILES, Locale.US))
+        assertThat(formatDrivingEventDetails(firstEvent, DistanceUnit.MILES, Locale.US))
             .isEqualTo("Exceeded limit by 20 km/h")
+        assertThat(formatDrivingEventDetails(secondEvent, DistanceUnit.MILES, Locale.US))
+            .isEqualTo("Speed: fast")
     }
 
     @Test
