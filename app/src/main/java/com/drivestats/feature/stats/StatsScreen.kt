@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QueryStats
+import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Timelapse
 import androidx.compose.material.icons.outlined.Warning
@@ -225,7 +226,7 @@ private fun StatsPopulatedState(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             SummaryCard(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Outlined.QueryStats,
+                icon = Icons.Outlined.Route,
                 label = stringResource(R.string.stats_total_distance),
                 value = state.summary.formatTotalDistance(distanceUnit, locale),
             )

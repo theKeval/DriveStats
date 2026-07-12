@@ -62,12 +62,12 @@ internal fun buildStatsSnapshot(
     zoneId: ZoneId,
 ): StatsSnapshot {
     val validTrips = trips.filter { it.isValidForStats() }
-    val hasPartialData = trips.any { it.isPotentiallyPartial() }
+    val hasPartialData = trips.any { it.isExcludedFromStats() }
     val today = now.atZone(zoneId).toLocalDate()
     val chartDates = (6 downTo 0).map { today.minusDays(it.toLong()) }
     val unknownChartDates = if (hasPartialData) {
         trips.asSequence()
-            .filterNot { it.isValidForStats() }
+            .filter { it.isExcludedFromStats() }
             .mapNotNull { trip -> Instant.ofEpochMilli(trip.startTimeMs).atZone(zoneId).toLocalDate() }
             .filter { it in chartDates }
             .toSet()
@@ -138,10 +138,7 @@ internal fun SummaryStats.formatTotalDuration(): String {
 
 internal fun SummaryStats.formatAverageSpeed(distanceUnit: DistanceUnit, locale: Locale): String {
     val speedMetersPerHour = averageSpeedMetersPerHour ?: return "—"
-    val speed = when (distanceUnit) {
-        DistanceUnit.KILOMETERS -> speedMetersPerHour / METERS_PER_KILOMETER
-        DistanceUnit.MILES -> speedMetersPerHour / METERS_PER_MILE
-    }
+    val speed = speedMetersPerHour.toSpeedIn(distanceUnit)
     return String.format(locale, "%.1f %s", speed, distanceUnit.speedSuffix)
 }
 
@@ -149,10 +146,7 @@ internal fun PersonalRecord.formatValue(type: RecordType, distanceUnit: Distance
     when (type) {
         RecordType.LONGEST_TRIP -> formatDistance(distanceMeters, distanceUnit, locale)
         RecordType.FASTEST_AVERAGE_SPEED -> {
-            val speed = when (distanceUnit) {
-                DistanceUnit.KILOMETERS -> averageSpeedMetersPerHour / METERS_PER_KILOMETER
-                DistanceUnit.MILES -> averageSpeedMetersPerHour / METERS_PER_MILE
-            }
+            val speed = averageSpeedMetersPerHour.toSpeedIn(distanceUnit)
             String.format(locale, "%.1f %s", speed, distanceUnit.speedSuffix)
         }
     }
@@ -186,7 +180,12 @@ private fun TripSession.isValidForStats(): Boolean {
         end > startTimeMs
 }
 
-private fun TripSession.isPotentiallyPartial(): Boolean = !isValidForStats()
+private fun TripSession.isExcludedFromStats(): Boolean = !isValidForStats()
+
+private fun Double.toSpeedIn(distanceUnit: DistanceUnit): Double = when (distanceUnit) {
+    DistanceUnit.KILOMETERS -> this / METERS_PER_KILOMETER
+    DistanceUnit.MILES -> this / METERS_PER_MILE
+}
 
 private fun TripSession.averageSpeedMetersPerHour(): Double? {
     val end = endTimeMs ?: return null
