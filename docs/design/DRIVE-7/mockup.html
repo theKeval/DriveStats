@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>DriveStats — About</title>
+<style>
+  :root {
+    --surface: #0E1116;
+    --surface-container: #161B22;
+    --surface-container-high: #1E2530;
+    --surface-container-highest: #252D3A;
+    --on-surface: #E3E6EA;
+    --on-surface-variant: #A6ADB8;
+    --outline: #3A414C;
+    --outline-variant: #232933;
+    --primary: #00E5B3;
+    --on-primary: #00382A;
+    --primary-container: #00513C;
+    --on-primary-container: #6FF6D0;
+    --secondary: #FF7A45;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 1080px;
+    height: 2400px;
+    overflow: hidden;
+    background: var(--surface);
+    font-family: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--on-surface);
+  }
+
+  .screen {
+    width: 1080px;
+    height: 2400px;
+    display: flex;
+    flex-direction: column;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% 0%, rgba(0,229,179,0.06), transparent 60%),
+      var(--surface);
+  }
+
+  /* Top app bar */
+  .app-bar {
+    height: 168px;
+    min-height: 168px;
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    position: relative;
+  }
+  .app-bar .back-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .app-bar .back-btn img { width: 36px; height: 36px; }
+  .app-bar .title {
+    position: absolute;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 42px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+  }
+
+  /* Content */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 48px;
+    position: relative;
+  }
+
+  .hero {
+    margin-top: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .logo-tile {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(0,229,179,0.30), transparent 68%),
+      var(--primary-container);
+    box-shadow: 0 0 0 1px rgba(0,229,179,0.14), 0 24px 64px -12px rgba(0,229,179,0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-tile img { width: 180px; height: 180px; }
+
+  .app-name {
+    margin-top: 48px;
+    font-size: 60px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .version-chip {
+    margin-top: 20px;
+    padding: 12px 28px;
+    border-radius: 20px;
+    background: var(--surface-container-high);
+    border: 1px solid var(--outline);
+    color: var(--on-surface-variant);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  .description {
+    margin-top: 64px;
+    max-width: 900px;
+    text-align: center;
+    font-size: 32px;
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+    font-weight: 400;
+  }
+
+  .divider {
+    width: 100%;
+    max-width: 984px;
+    height: 1px;
+    background: var(--outline-variant);
+    margin-top: 96px;
+  }
+
+  .link-row {
+    width: 100%;
+    max-width: 984px;
+    margin-top: 48px;
+    height: 148px;
+    border-radius: 28px;
+    background: var(--surface-container);
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    gap: 32px;
+  }
+  .link-row .icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: var(--surface-container-high);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .link-row .icon-wrap img { width: 40px; height: 40px; }
+  .link-row .label {
+    flex: 1;
+    font-size: 34px;
+    font-weight: 500;
+    color: var(--on-surface);
+  }
+  .link-row .sub {
+    display: block;
+    margin-top: 6px;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--on-surface-variant);
+  }
+  .link-row .chevron { width: 40px; height: 40px; flex-shrink: 0; opacity: 0.9; }
+
+  .footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 340px;
+    text-align: center;
+    font-size: 24px;
+    color: var(--on-surface-variant);
+    line-height: 1.6;
+  }
+  .footer .heart { color: var(--secondary); }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <div class="app-bar">
+      <div class="back-btn">
+        <img src="./assets/icon-back-arrow.svg" alt="" />
+      </div>
+      <div class="title">About</div>
+    </div>
+
+    <div class="content">
+      <div class="hero">
+        <div class="logo-tile">
+          <img src="./assets/logo-mark.svg" alt="DriveStats logo" />
+        </div>
+        <div class="app-name">DriveStats</div>
+        <div class="version-chip">Version 2.4.1 (Build 218)</div>
+      </div>
+
+      <p class="description">
+        Track every drive. See your speed, distance, routes, and fuel
+        efficiency trends over time — all recorded automatically, right
+        on your device.
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="link-row">
+        <div class="icon-wrap">
+          <img src="./assets/icon-github.svg" alt="" />
+        </div>
+        <div class="label">
+          View source on GitHub
+          <span class="sub">github.com/drivestats/drivestats-android</span>
+        </div>
+        <img class="chevron" src="./assets/icon-chevron-right.svg" alt="" />
+      </div>
+
+      <div class="footer">
+        © 2026 DriveStats · Built for drivers, by drivers <span class="heart">♥</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

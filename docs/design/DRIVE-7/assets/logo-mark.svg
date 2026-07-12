@@ -1,0 +1,20 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F5B8"/>
+      <stop offset="100%" stop-color="#00B98A"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="#00513C"/>
+  <circle cx="60" cy="60" r="60" fill="url(#logoGrad)" fill-opacity="0.18"/>
+  <!-- gauge arc -->
+  <path d="M 28 74 A 34 34 0 1 1 92 74" fill="none" stroke="#0E3A2C" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 28 74 A 34 34 0 0 1 60 26" fill="none" stroke="url(#logoGrad)" stroke-width="7" stroke-linecap="round"/>
+  <!-- needle -->
+  <line x1="60" y1="66" x2="78" y2="42" stroke="#6FF6D0" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="60" cy="66" r="6" fill="#6FF6D0"/>
+  <!-- ticks -->
+  <circle cx="38" cy="46" r="2.2" fill="#00F5B8"/>
+  <circle cx="82" cy="46" r="2.2" fill="#0E3A2C"/>
+  <circle cx="60" cy="30" r="2.2" fill="#0E3A2C"/>
+</svg>
